@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html>
+
+<script>
+    window.nodeRequire = require;
+    delete window.process;
+    delete window.require;
+    delete window.exports;
+    delete window.module;
+</script>
+<script src=JS/jquery-3.2.1.js></script>
+<script src=JS/jquery-ui.js></script>
+
+<style>
+    b,
+    strong {
+        color: #5D9EB2;
+    }
+</style>
+<style>
+    s,
+    strike {
+        color: #990000;
+    }
+</style>
+<style>
+    @import url(https://fonts.googleapis.com/css?family=Roboto:300);
+
+    .login-page {
+        width: 360px;
+        padding: 8% 0 0;
+        margin: auto;
+    }
+
+    .form {
+        position: relative;
+        z-index: 1;
+        background: #FFFFFF;
+        max-width: 360px;
+        margin: 0 auto 100px;
+        padding: 45px;
+        text-align: center;
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    .form input {
+        font-family: "Roboto", sans-serif;
+        outline: 0;
+        background: #f2f2f2;
+        width: 100%;
+        border: 0;
+        margin: 0 0 15px;
+        padding: 15px;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+
+    .form button {
+        font-family: "Roboto", sans-serif;
+        text-transform: uppercase;
+        outline: 0;
+        background: #4CAF50;
+        width: 100%;
+        border: 0;
+        padding: 15px;
+        color: #FFFFFF;
+        font-size: 14px;
+        -webkit-transition: all 0.3 ease;
+        transition: all 0.3 ease;
+        cursor: pointer;
+    }
+
+    .form button:hover,
+    .form button:active,
+    .form button:focus {
+        background: #43A047;
+    }
+
+    .form .message {
+        margin: 15px 0 0;
+        color: #b3b3b3;
+        font-size: 12px;
+    }
+
+    .form .message a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+
+    .form .register-form {
+        display: none;
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .container:before,
+    .container:after {
+        content: "";
+        display: block;
+        clear: both;
+    }
+
+    .container .info {
+        margin: 50px auto;
+        text-align: center;
+    }
+
+    .container .info h1 {
+        margin: 0 0 15px;
+        padding: 0;
+        font-size: 36px;
+        font-weight: 300;
+        color: #1a1a1a;
+    }
+
+    .container .info span {
+        color: #4d4d4d;
+        font-size: 12px;
+    }
+
+    .container .info span a {
+        color: #000000;
+        text-decoration: none;
+    }
+
+    .container .info span .fa {
+        color: #EF3B3A;
+    }
+
+    body {
+        background: #76b852;
+        /* fallback for old browsers */
+        background: -webkit-linear-gradient(right, #76b852, #8DC26F);
+        background: -moz-linear-gradient(right, #76b852, #8DC26F);
+        background: -o-linear-gradient(right, #76b852, #8DC26F);
+        background: linear-gradient(to left, #76b852, #8DC26F);
+        font-family: "Roboto", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+</style>
+
+
+<meta charset="UTF-8">
+<title>Eztype App</title>
+
+<body>
+
+    <div ID="outputdiv"></div>
+    <div>
+        <div id="example-table"></div>
+
+        <div style="margin-top:23px;margin-left:0px">
+
+            <button id="start" style="background-color: #1abc9c;" onclick="startpen()">Start
+            </button>
+        </div>
+
+        <div id="cblist">
+
+
+
+            <button type="button" onclick="buildSitesSelected()">Get sites</button>
+
+        </div>
+
+    </div>
+    <!--    <div id="example-table"></div>-->
+
+
+    <div ID="configEXT" style="display:none">
+        <H4>EXTENDEDTOOLKIT PATH is missing. Click below to configure it</H4>
+        <button id="browser" onclick="EXTENDEDTOOLKIT_PATH();"> Open </button>
+
+    </div>
+
+    <div ID="changeConfig" style="display:block">
+        <H4>Click below to configure stuffs</H4>
+
+        <button id="browser" onclick="configs();"> Configure </button>
+
+    </div>
+
+    <div id="configSite" class="configSite" style="display:none">
+        <div class="form">
+            <div class="login-form">
+                <input type="text" id="siteName" placeholder="sitename" />
+                <input type="text" id="userName" placeholder="username" />
+                <input type="password" id="password" placeholder="password" />
+                <button id="credsSave" onclick="credsSave();">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = nodeRequire('electron').remote;
+        var rp = nodeRequire('request-promise');
+        const os = nodeRequire('os');
+        var Promise = nodeRequire('promise');
+        var fse = nodeRequire("fs-extra");
+        var http = nodeRequire('http');
+        var miscellaneousFolderID = "";
+        var prepend = nodeRequire('prepend');
+        var download = nodeRequire('download-file')
+        var yauzl = nodeRequire("yauzl");
+        var AdmZip = nodeRequire('adm-zip');
+        var cmd = nodeRequire('node-cmd');
+        var chokidar = nodeRequire('chokidar');
+        var webdav = nodeRequire('./windows.js')
+        var exec = nodeRequire('child_process').exec
+        const osName = nodeRequire('os-name');
+        var cmd = nodeRequire('node-cmd');
+        var URL = nodeRequire('url-parse');
+        const fixPath = nodeRequire('fix-path')();
+        var heimdall;
+        var loki;
+        // var filewatcher = nodeRequire('filewatcher');
+        // var unzip = nodeRequire('unzip')
+
+
+        //  var tabulator = nodeRequire('jquery.tabulator');
+        //var $ = nodeRequire("jquery");
+
+        //        var out = localStorage.getItem('ds');
+        var output = localStorage.getItem('output');
+        var fs = nodeRequire("fs");
+        const fileExists = nodeRequire('file-exists');
+        var sitecount;
+        const {
+            dialog
+        } = nodeRequire('electron').remote
+        //  var SITE_URL = "http://process:1234@springer.pagemajik.online";
+        //        var SITE_URL = localStorage.getItem('SITEURL')
+        //        var DEFAULT_USER = localStorage.getItem('user')
+        //        var DEFAULT_PASS = localStorage.getItem('password')
+        //var hostname = localStorage.getItem("hostname")
+
+        var hostname = "springer.pagemajik.online"
+
+        var selectedSites = "";
+        var currentsite;
+        var PAGEMAJIK_DOWNLOAD_PATH = os.homedir() + "/" + "PageMajik/";
+        var final;
+        var getIndesignSupBool = false;
+        var javascriptContent = "";
+        var URL_PAGEMAJIK_PENDING;
+        var URL_FileVersion;
+        var URL_FileEntry;
+        var URL_cancelCheckout_download;
+        var URL_getAllFiles;
+        var process1 = app.process;
+        //  console.log(hostname)
+
+        var SITE_URL
+        var DEFAULT_USER
+        var DEFAULT_PASS
+
+
+        var SYSTEM_OS = "Windows";
+        var webDavURL;
+        console.log(SYSTEM_OS);
+        var dat;
+        var mountFirst = true;
+        var batdat;
+        var drivemounted = false;
+        var checkEx = false;
+        var checkSc = false;
+        var selected = [];
+        var sitesready = false;
+        var credsready = false;
+        var currentfile;
+        var statusfileuserID;
+        var filename;
+        var fileFolderId;
+        var artFolderId = "";
+        var fileExtension;
+        var fileMimeType;
+        var fileDescription;
+        var fileTreePath;
+        var fileEntryId;
+        var process;
+        var stage;
+        var filePath;
+        var indesignScriptInpPath
+        var companyID;
+        var fileuserID;
+        var scriptsfolderID;
+        var FontsID;
+        var BookLevelAdobeScriptID;
+        var SupportID;
+        var LibraryID;
+        var PresetID;
+        var SiteLevelAdobeScriptID;
+        var ClientLevelAdobeScriptID;
+        var ClientLevelPagemajikScriptID;
+        var InstructionID;
+        var SiteLevelPagemajikScriptID;
+        var BookLevelPagemajikScriptID;
+        var ReviewID;
+        var MiscellaneousID;
+        var fileRepFolderId;
+        var chapterID;
+        var retry;
+        var scriptsPath = os.homedir() + "/" + "Documents/Adobe Scripts/";
+        var scriptsPath1 = os.homedir() + "\\" + "Documents\\Adobe Scripts\\";
+        var indesignScriptPath = scriptsPath;
+
+
+
+
+        function credCheck() {
+
+            /* fileExists(os.homedir() + "/EXTENDEDTOOLKIT_PATH.ezt").then(exists => {
+                console.log(exists) // OUTPUTS: true or false
+                if (exists == true) {
+                    checkEx = true;
+                } else {
+                    editconfigfiles();
+                }
+            }) */
+
+            if (localStorage.getItem('EXT_PATH') == null) {
+                editconfigfiles();
+            } else {
+                checkEx = true;
+                console.log("checkEx" + checkEx)
+                SITE_URL = localStorage.getItem("SITE_id")
+            }
+
+            if (localStorage.getItem('SITE_id') == null) {
+                editsitedetails();
+            } else {
+                checkSc = true;
+                DEFAULT_USER = localStorage.getItem("USER_id")
+                DEFAULT_PASS = localStorage.getItem("PASS_id")
+
+            }
+
+
+
+            /*    fileExists(os.homedir() + "/SITECONFIG.ezt").then(exists => {
+                   console.log(exists) // OUTPUTS: true or false
+                   if (exists == true) {
+                       checkSc = true;
+                   } else {
+                       editconfigfiles();
+                   }
+               }) */
+
+        }
+
+
+
+        credCheck();
+
+        var buildPromise = buildsites();
+        retry = 0;
+        buildPromise.then(function (result) {
+            // // console.log("nextline");
+            console.log(result);
+            var selected = [];
+
+        }, function (err) {
+            console.log(err);
+        })
+
+        function configs() {
+            document.getElementById('configEXT').style.display = "block"
+            document.getElementById('configSite').style.display = "block";
+        }
+
+
+        function editconfigfiles() {
+            // fs.unlink(os.homedir() + "/EXTENDEDTOOLKIT_PATH.ezt");
+            // fs.unlink(os.homedir() + "/SITECONFIG.ezt");
+            // fs.unlink(os.homedir() + "/SITESELECTIONCONFIG.ezt");
+            //get all three values and write to all three files
+            document.getElementById('configEXT').style.display = "block"
+
+        }
+
+        function EXTENDEDTOOLKIT_PATH() {
+            dialog.showOpenDialog({
+                properties: ['openFile']
+            }, function (fileNames) {
+                console.log(fileNames)
+                var EXT_PATH = fileNames
+                console.log(EXT_PATH)
+                localStorage.setItem("EXT_PATH", fileNames);
+            });
+
+            console.log(localStorage.getItem('EXT_PATH'))
+        }
+
+        function editsitedetails() {
+            document.getElementById('configSite').style.display = "block";
+        }
+
+        function credsSave() {
+            SITE_URL = document.getElementById('siteName').value
+            DEFAULT_USER = document.getElementById('userName').value
+            DEFAULT_PASS = document.getElementById('password').value
+
+            console.log(SITE_URL);
+            console.log(DEFAULT_USER);
+            console.log(DEFAULT_PASS);
+
+
+            localStorage.setItem('SITE_id', SITE_URL);
+            localStorage.setItem('USER_id', DEFAULT_USER);
+            localStorage.setItem('PASS_id', DEFAULT_PASS);
+
+        }
+
+        function addCheckbox(name, groupid) {
+            var container = $('#cblist');
+            var inputs = container.find('input');
+            var id = inputs.length + 1;
+
+            $('<input />', {
+                type: 'checkbox',
+                id: 'cb' + id,
+                class: 'checkclass',
+                value: groupid
+            }).appendTo(container);
+            $('<label />', {
+                'for': 'cb' + id,
+                text: name
+            }).appendTo(container);
+        }
+
+
+        function buildSitesSelected() {
+            selectedSites = "";
+            $('.checkclass:checkbox:checked').each(function () {
+                //   console.log(this.value)
+                selectedSites += this.value + "%2C"
+            });
+
+            //   console.log(selected)
+            //for(i=0;i<selected.length;i++)
+            //selectedSites = selected.pop() + "%2C"
+            console.log(selectedSites);
+            sitesready = true;
+        }
+
+
+
+        function buildsites() {
+            // Setting URL and headers for request
+            SITE_URL = localStorage.getItem("SITE_id");
+            var tmpcheck = SITE_URL +
+                "/api/jsonws/group/get-user-sites"
+            console.log(tmpcheck)
+
+            var options = {
+                method: 'GET',
+                uri: tmpcheck,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 30000,
+                resolveWithFullResponse: true
+            };
+            // Return new promise 
+            return new Promise(function (resolve, reject) {
+                // Do async job
+
+                rp(options)
+                    .then(function (response) {
+                        // POST succeeded...
+                        var USER_SITES_DETAILS = JSON.parse(response.body);
+                        //   console.log(USER_SITES_DETAILS);
+                        //   console.log(USER_SITES_DETAILS.length);
+                        sitecount = USER_SITES_DETAILS.length;
+                        for (var i = 1; i < USER_SITES_DETAILS.length; i++) {
+                            console.log(USER_SITES_DETAILS[i].name, USER_SITES_DETAILS[i].groupId)
+                            //selectedSites += USER_SITES_DETAILS[i].name + "%2C";
+                            addCheckbox(USER_SITES_DETAILS[i].name, USER_SITES_DETAILS[i].groupId);
+
+                        }
+
+                        //   console.log(selectedSites)
+                        return resolve(selectedSites)
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        retry++;
+                        if (retry < 2)
+                            return reject(err);
+                    });
+            })
+
+        }
+
+
+
+        function pendingfiles() {
+            // Setting URL and headers for request
+            var pending_files = URL_PAGEMAJIK_PENDING + "/group-ids/" + selectedSites +
+                "/indd-version/" + "CS6";
+            console.log(JSON.stringify(pending_files))
+            var options = {
+                method: 'POST',
+                uri: pending_files,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 30000,
+                resolveWithFullResponse: true
+            };
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(options)
+                    .then(function (response) {
+                        // POST succeeded...
+                        currentfile = JSON.parse(response.body);
+                        return resolve(currentfile)
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        pending_files();
+                        return reject(err);
+
+                    });
+            })
+
+        }
+
+
+
+        async function startpen() {
+            if (checkEx == true && checkSc == true) {
+                credsready = true
+
+                webDavURL = getwebDavURL();
+
+
+                URL_getAllFiles = SITE_URL + "/api/jsonws/Dazzle-portlet.pagemajik/folder-zip/folder-id/";
+                URL_PAGEMAJIK_PENDING = SITE_URL +
+                    "/api/jsonws/Dazzle-portlet.pagemajik/find-by-file-name/status/Pending";
+                //  console.log(URL_PAGEMAJIK_PENDING)
+                URL_FileVersion = SITE_URL + "/api/jsonws/dlfileversion/get-latest-file-version/file-entry-id/";
+                URL_FileEntry = SITE_URL + "/api/jsonws/dlapp/get-file-entry/file-entry-id/";
+                URL_cancelCheckout_download = SITE_URL +
+                    "/api/jsonws/Dazzle-portlet.pagemajik/universal-service/file-entry-id/"
+
+                fse.ensureDirSync(scriptsPath);
+            }
+            if (credsready == true && sitesready == true) {
+                //var pendingPromise = ;
+
+                pending_start();
+            }
+        }
+
+
+        function pending_start() {
+            console.log("Am in")
+            if (credsready == true && sitesready == true) {
+                pendingfiles().then(function (result) {
+                        function isEmpty(obj) {
+                            for (var key in obj) {
+                                if (obj.hasOwnProperty(key))
+                                    return false;
+                            }
+                            return true;
+                        }
+                        if (isEmpty(result)) {
+                            // // console.log("nextline");
+                            console.log(result);
+                            setTimeout(pending_start, 5000)
+                        } else {
+                            console.log(result);
+                            if (result.fileEntryId !== null) {
+                                fileEntryID = result.fileEntryId;
+                                //   console.log(fileEntryID);
+                                process = result.process;
+                                //   console.log(process);
+                                filePath = result.filePath;
+                                //   console.log(filePath);
+                                stage = result.field5
+                                //    console.log(stage);
+                                filePath = filePath.replace("Z:", "");
+                                //   console.log(filePath);
+                                currentProcess = process;
+                                var filePresetID = "";
+                                statusfileuserID = result.userId;
+                            }
+                            if (result.preset !== null) {
+                                filePresetID = result.preset;
+                            }
+
+                            currentfile = "";
+                            retry = 0
+                            getFileObject(fileEntryID).then(function (result) {
+                                    //  console.log("GFOnextline");
+                                    console.log(result);
+                                    /*if (result.exception.match('NoSuchFileEntryException') || (result.status == 8)) {
+                                        console.log("File is Deleted");
+                                    }*/
+
+                                    filename = result.title;
+                                    fileFolderId = result.folderId;
+                                    fileRepFolderId = result.groupId;
+                                    fileExtension = result.extension;
+                                    fileMimeType = result.mimeType;
+                                    fileDescription = result.description;
+                                    fileTreePath = result.treePath;
+                                    companyID = result.companyId;
+                                    fileuserID = result.userId;
+                                    indesignScriptInpPath = PAGEMAJIK_DOWNLOAD_PATH + fileRepFolderId +
+                                        "/" +
+                                        fileFolderId + "/" + filename;
+
+                                    console.log(indesignScriptInpPath)
+                                    //  console.log(filename);
+                                    //   console.log(fileFolderId);
+                                    //   console.log(fileRepFolderId);
+                                    //   console.log(fileExtension);
+                                    //   console.log(fileMimeType);
+                                    //  console.log(fileDescription);
+                                    //   console.log(fileTreePath);
+                                    //   console.log(companyID);
+                                    //    console.log(fileuserID);
+                                    var downloadPath = PAGEMAJIK_DOWNLOAD_PATH + fileRepFolderId + "/" +
+                                        fileFolderId;
+                                    //call universal service to put in progress and get downloadURL
+                                    var downloadURL;
+                                    var downloadURLpromise = cancel_checkout_download(fileEntryID,
+                                        fileRepFolderId);
+                                    downloadURLpromise.then(function (result) {
+                                            // console.log("nextline");
+                                            console.log(result.URL);
+                                            downloadURL = result.URL;
+                                            //console.log(fileRepFolderId)
+
+                                            // console.log(SITE_URL + downloadURL);
+                                            fse.ensureDirSync(downloadPath);
+                                            console.log(downloadPath)
+                                            console.log("File Entry ID is :" + fileEntryID)
+                                            var received_bytes;
+                                            url = SITE_URL + downloadURL;
+
+
+                                            rp.get({
+                                                    uri: url,
+                                                    auth: {
+                                                        'user': DEFAULT_USER,
+                                                        'pass': DEFAULT_PASS
+                                                    }
+                                                })
+                                                /* .on('response', function (data) {
+
+                                                    total_bytes = parseInt(data.headers['content-length']);
+                                                    console.log(data.statusCode);
+                                                    return console.log(data)
+
+                                                }).on('data', function (chunk) {
+                                                    received_bytes += chunk.length;
+                                                    return console.log(chunk);
+                                                }).on('error', function (err) {
+                                                    return console.log(err);
+                                                }) */
+                                                .pipe(fs.createWriteStream(downloadPath + '/' + filename));
+
+                                            var supportPath3 = supportPath.replace(/\//g, '\\')
+                                            supportPath3 = supportPath3.replace(/\\/g, '\\\\')
+                                            indesignScriptInpPath = indesignScriptInpPath.replace(/\//g,
+                                                '\\')
+                                            indesignScriptInpPath = indesignScriptInpPath.replace(/\\/g,
+                                                '\\\\')
+                                            indesignScriptPath = indesignScriptPath.replace(/\//g, '\\')
+                                            indesignScriptPath = indesignScriptPath.replace(/\\/g, '\\\\')
+
+
+                                            javascriptContent = javascriptContent + "#target indesign" +
+                                                "\n"
+                                            javascriptContent = javascriptContent +
+                                                "#targetengine  \"session\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                "app.scriptPreferences.userInteractionLevel = UserInteractionLevels.NEVER_INTERACT" +
+                                                "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var	inputFilePath = \"" +
+                                                indesignScriptInpPath + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var	scriptsFilePath = \"" +
+                                                indesignScriptPath + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var webDavAddress = \"" +
+                                                supportPath3 + "Links" + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var userName = \"" +
+                                                DEFAULT_USER + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var userCred = \"" +
+                                                DEFAULT_PASS + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileEntryId = \"" +
+                                                fileEntryID + "\"" + "\n"
+                                            javascriptContent = javascriptContent + " var process = \"" +
+                                                process + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var filename = \"" +
+                                                filename + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileFolderId = \"" +
+                                                fileFolderId + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileRepFolderId = \"" +
+                                                fileRepFolderId + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileExtension = \"" +
+                                                fileExtension + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileMimeType = \"" +
+                                                fileMimeType + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileDescription = \"" +
+                                                fileDescription + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileTreePath = \"" +
+                                                fileTreePath + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var filePath = \"" +
+                                                filePath + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var companyID = \"" +
+                                                companyID + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var fileuserID = \"" +
+                                                statusfileuserID + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var slugLineInfo = \"" +
+                                                stage + "\"" + "\n"
+
+                                            console.log(javascriptContent);
+                                            // console.log(downloadURL)
+                                            // return resolve();
+                                        },
+                                        function (err) {
+                                            console.log(err);
+                                        })
+
+
+
+
+
+
+
+                                    var supportPath = PAGEMAJIK_DOWNLOAD_PATH + fileRepFolderId + "/" +
+                                        fileFolderId + "/";
+
+                                    console.log(supportPath)
+                                    var supportPath2 = supportPath.replace(/\//g, '\\')
+                                    supportPath2 = supportPath2.replace(/\/\//g, '\\')
+
+                                    var fontsFolderPath = supportPath + "/Document fonts/"
+
+                                    fse.ensureDirSync(fontsFolderPath)
+
+                                    console.log(scriptsPath)
+
+
+                                    /*  prepend(scriptsPath + "PDF_Generator.jsx", function (err) {
+                                         if (err) {
+                                             return console.log(err);
+                                         }
+
+                                         console.log("The ScriptsFile is saved!");
+                                     }); */
+
+
+
+                                    //fs.closeSync(fs.openSync(indesignScriptInpPath, 'w'));
+
+                                    // fs.closeSync(fs.openSync(scriptsPath, 'w'));
+
+
+
+                                    var ancestorFolderIDs = fileTreePath.split('/');
+                                    ancestorFolderIDs =
+                                        ancestorFolderIDs.reverse();
+                                    // console.log(ancestorFolderIDs)
+                                    chapterID = ancestorFolderIDs[2];
+                                    /*     console.log(chapterID)
+
+                                       // ancestorFolderIDs.splice(ancestorFolderIDs.length - 1, 1)
+                                       // ancestorFolderIDs[ancestorFolderIDs.length] = 0;
+                                        console.log(ancestorFolderIDs)  */
+                                    retry = 0;
+                                    var getAllFolderIDPromise = getAllFolderID(chapterID, fileRepFolderId)
+
+                                    getAllFolderIDPromise.then(async function (result) {
+
+
+                                            // // console.log("nextline");
+                                            console.log("getAllfolderID" + JSON.stringify(result));
+
+
+
+                                            var heimdall = false;
+                                            localStorage.setItem("heimdall", "false")
+                                            var loki = false;
+                                            FontsID = result.Fonts;
+                                            BookLevelAdobeScriptID = result.BookLevelAdobeScript;
+                                            SupportID = result.Support;
+                                            LibraryID = result.Library;
+                                            PresetID = result.Preset;
+                                            SiteLevelAdobeScriptID = result.SiteLevelAdobeScript;
+                                            ClientLevelAdobeScriptID = result.ClientLevelAdobeScript;
+                                            ClientLevelPagemajikScriptID = result.ClientLevelPagemajikScript;
+                                            InstructionID = result.Instruction;
+                                            SiteLevelPagemajikScriptID = result.SiteLevelPagemajikScript;
+                                            BookLevelPagemajikScriptID = result.BookLevelPagemajikScript;
+                                            ReviewID = result.Review;
+                                            MiscellaneousID = result.Miscellaneous;
+                                            artFolderId = result.Art;
+
+                                            if (artFolderId != 0) {
+                                                var serverPath = await getServerPathSync(fileRepFolderId,
+                                                    artFolderId);
+                                                serverPath = serverPath.rsyncPath;
+                                                var patt = /([\s\W])/g;
+                                                serverPath = serverPath.replace(patt, '\\$1');
+                                                console.log(serverPath)
+                                                heimdall = await rsyncFetch(serverPath, supportPath, "", "")
+                                            }
+
+                                            console.log(
+                                                "All ID's FID BLAdobeID SupID LibID PreID SLAdobeID CLAdobeID CLPmID InsID SLPmID BLPmID ReviewID MisID" +
+                                                FontsID + " " + BookLevelAdobeScriptID + " " +
+                                                SupportID +
+                                                " " + LibraryID + " " + PresetID + " " +
+                                                SiteLevelAdobeScriptID + " " + ClientLevelAdobeScriptID +
+                                                " " + ClientLevelPagemajikScriptID + " " +
+                                                InstructionID +
+                                                " " + SiteLevelPagemajikScriptID + " " +
+                                                BookLevelPagemajikScriptID + " " + ReviewID + " " +
+                                                MiscellaneousID)
+
+
+
+
+                                            if (process.match("Auto Correction") || process.match(
+                                                    "First Proof")) {
+
+                                                /* if (InstructionID != 0)
+                                                    await getAllFolderContents(InstructionID,
+                                                        fileRepFolderId); */
+
+                                                if (SiteLevelAdobeScriptID != 0) {
+                                                    await getAllFolderContents(SiteLevelAdobeScriptID,
+                                                        fileRepFolderId, "SLAdobe.zip");
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/SLAdobe.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    // unzip(os.homedir() + "/PageMajik/SLAdobe.zip", scriptsPath);
+                                                    console.log("Am done waiting")
+                                                }
+
+                                                if (SiteLevelPagemajikScriptID != 0) {
+                                                    await getAllFolderContents(SiteLevelPagemajikScriptID,
+                                                        fileRepFolderId, "SLPM.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/SLPM.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //unzip(os.homedir() + "/PageMajik/SLPM.zip", scriptsPath);
+                                                }
+
+                                                if (FontsID != 0) {
+                                                    await getAllFolderContents(FontsID,
+                                                        fileRepFolderId, "fonts.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/fonts.zip");
+                                                    zip.extractAllTo( /*target path*/ fontsFolderPath, /*overwrite*/
+                                                        true);
+                                                    // unzip(os.homedir() + "/PageMajik/fonts.zip" ,fontsFolderPath);
+                                                }
+
+
+
+                                                if (ClientLevelAdobeScriptID != 0) {
+                                                    await getAllFolderContents(ClientLevelAdobeScriptID,
+                                                        fileRepFolderId, "CLAdobe.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/CLAdobe.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //unzip(os.homedir() + "/PageMajik/CLAdobe.zip", scriptsPath)
+                                                }
+
+                                                if (ClientLevelPagemajikScriptID != 0) {
+                                                    await getAllFolderContents(ClientLevelPagemajikScriptID,
+                                                        fileRepFolderId, "CLPM.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/CLPM.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    // unzip(os.homedir() + "/PageMajik/CLPM.zip", scriptsPath);
+                                                }
+
+
+
+                                                if (BookLevelAdobeScriptID != 0) {
+                                                    await getAllFolderContents(BookLevelAdobeScriptID,
+                                                        fileRepFolderId, "BLAdobe.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/BLAdobe.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //  unzip(os.homedir() + "/PageMajik/BLAdobe.zip", scriptsPath)
+                                                }
+
+                                                if (BookLevelPagemajikScriptID != 0) {
+                                                    await getAllFolderContents(BookLevelPagemajikScriptID,
+                                                        fileRepFolderId, "BLPM.zip")
+                                                    //fse.ensureDirSync(supportPath +"/Instruction/")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/BLPM.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //  unzip(os.homedir() + "/PageMajik/BLPM.zip", scriptsPath);
+                                                }
+
+                                                if (InstructionID != 0) {
+                                                    await getAllFolderContents(BookLevelPagemajikScriptID,
+                                                        fileRepFolderId, "InstructionID.zip")
+                                                    fse.ensureDirSync(supportPath + "/Instruction/")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/InstructionID.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+
+                                                    //  unzip(os.homedir() + "/PageMajik/InstructionID.zip", supportPath +"/Instruction/");
+                                                }
+
+
+                                                prepend(scriptsPath1 + "PDF_Generator.jsx",
+                                                    javascriptContent,
+                                                    function (err) {
+                                                        if (err) {
+                                                            return console.log(err);
+                                                        }
+
+                                                        console.log("The ScriptsFile is saved!");
+                                                    });
+
+
+                                                var completedFN = filename.replace(/\.[^/.]+$/,
+                                                    "_Completed.txt")
+                                                var idmlfilename = filename.replace(/\.[^/.]+$/,
+                                                    ".idml")
+                                                var pdffilename = filename.replace(/\.[^/.]+$/,
+                                                    ".pdf")
+
+                                                var supportPath2 = supportPath.replace(/\//g, '\\')
+                                                supportPath2 = supportPath2.replace(/\/\//g, '\\')
+
+                                                console.log(supportPath2 + completedFN);
+
+                                                finalGP(heimdall);
+
+                                                function finalGP(heimdall) {
+                                                    if (heimdall == "true") {
+                                                        console.log("The gatekeeper allowed me")
+                                                        runIndesignScript(scriptsPath + "PDF_Generator.jsx",
+                                                            scriptsPath)
+                                                        console.log("Am done waiting too")
+                                                        fileExists(supportPath2 + completedFN).then(
+                                                            exists => {
+                                                                console.log(exists) // OUTPUTS: true or false
+                                                                if (exists == true) {
+                                                                    Console.log("TRUE")
+                                                                    // checkEx = true;
+                                                                } else {
+                                                                    console.log("FALSE")
+                                                                    var watcher = chokidar.watch(
+                                                                        supportPath2, {
+                                                                            persistent: true
+                                                                        });
+
+                                                                    // Something to use when events are received.
+                                                                    var log = console.log.bind(console);
+                                                                    // Add event listeners.
+                                                                    watcher
+                                                                        .on('add', async function (path) {
+                                                                            console.log(path)
+
+                                                                            if (path ==
+                                                                                supportPath2 +
+                                                                                completedFN) {
+                                                                                javascriptContent =
+                                                                                    "";
+                                                                                if (process.match(
+                                                                                        "Auto Correction"
+                                                                                    )) {
+                                                                                    retry = 0;
+                                                                                    await addorupdatefile
+                                                                                        (
+                                                                                            fileRepFolderId,
+                                                                                            fileFolderId,
+                                                                                            completedFN,
+                                                                                            supportPath2 +
+                                                                                            completedFN,
+                                                                                            companyID,
+                                                                                            fileuserID,
+                                                                                            "indd")
+                                                                                }
+                                                                                retry = 0;
+                                                                                await addorupdatefile
+                                                                                    (
+                                                                                        fileRepFolderId,
+                                                                                        SupportID,
+                                                                                        idmlfilename,
+                                                                                        supportPath2 +
+                                                                                        idmlfilename,
+                                                                                        companyID,
+                                                                                        fileuserID,
+                                                                                        "idml")
+                                                                                retry = 0;
+                                                                                await addorupdatefile
+                                                                                    (
+                                                                                        fileRepFolderId,
+                                                                                        ReviewID,
+                                                                                        pdffilename,
+                                                                                        supportPath2 +
+                                                                                        pdffilename,
+                                                                                        companyID,
+                                                                                        fileuserID,
+                                                                                        "pdf")
+
+
+                                                                                console.log(
+                                                                                    scriptsPath
+                                                                                )
+                                                                                fse.remove(
+                                                                                    scriptsPath
+                                                                                )
+                                                                                pending_start();
+
+                                                                            }
+                                                                            /* fileExists(supportPath2 +
+                                                                                    completedFN)
+                                                                                .then(exists => {
+                                                                                    console.log(exists) // OUTPUTS: true or false
+                                                                                    if (exists == true) {
+                                                                                        Console.log("Got the file")
+                                                                                        // checkEx = true;
+                                                                                    } else {
+                                                                                        console.log("FALSE")
+                                                                                    }
+                                                                                }) */
+                                                                        })
+                                                                    /* .on('change', path => log(
+                                                                        `File ${path} has been changed`))
+                                                                    .on('unlink', path => log(
+                                                                        `File ${path} has been removed`)); */
+
+                                                                    // More possible events.
+                                                                    watcher
+                                                                        .on('addDir', path => log(
+                                                                            `Directory ${path} has been added`
+                                                                        ))
+                                                                        .on('unlinkDir', path => log(
+                                                                            `Directory ${path} has been removed`
+                                                                        ))
+                                                                        .on('error', error => log(
+                                                                            `Watcher error: ${error}`
+                                                                        ))
+                                                                        .on('ready', () => log(
+                                                                            'Initial scan complete. Ready for changes'
+                                                                        ))
+                                                                    /* .on('raw', (event, path, details) => {
+                                                                        log('Raw event info:', event, path,
+                                                                            details); 
+                                                                    }); */
+                                                                }
+                                                            })
+                                                    } else {
+                                                        heimdall = localStorage.getItem("heimdall")
+                                                        setTimeout(function () {
+                                                            finalGP(heimdall);
+                                                        }, 10000)
+                                                    }
+
+                                                }
+
+
+
+
+
+
+                                                //runIndesignScript(scriptsPath + "PDF_Generator.jsx", scriptsPath);
+
+
+                                            }
+
+                                            if (process.match("Word to IDML")) {
+
+                                                if (SiteLevelAdobeScriptID != 0) {
+                                                    await getAllFolderContents(SiteLevelAdobeScriptID,
+                                                        fileRepFolderId, "SLAdobe.zip");
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/SLAdobe.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    // unzip(os.homedir() + "/PageMajik/SLAdobe.zip", scriptsPath);
+                                                    console.log("Am done waiting")
+                                                }
+
+                                                if (SiteLevelPagemajikScriptID != 0) {
+                                                    await getAllFolderContents(SiteLevelPagemajikScriptID,
+                                                        fileRepFolderId, "SLPM.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/SLPM.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //unzip(os.homedir() + "/PageMajik/SLPM.zip", scriptsPath);
+                                                }
+
+                                                if (FontsID != 0) {
+                                                    await getAllFolderContents(FontsID,
+                                                        fileRepFolderId, "fonts.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/fonts.zip");
+                                                    zip.extractAllTo( /*target path*/ fontsFolderPath, /*overwrite*/
+                                                        true);
+                                                    // unzip(os.homedir() + "/PageMajik/fonts.zip" ,fontsFolderPath);
+                                                }
+
+
+
+                                                if (ClientLevelAdobeScriptID != 0) {
+                                                    await getAllFolderContents(ClientLevelAdobeScriptID,
+                                                        fileRepFolderId, "CLAdobe.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/CLAdobe.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //unzip(os.homedir() + "/PageMajik/CLAdobe.zip", scriptsPath)
+                                                }
+
+                                                if (ClientLevelPagemajikScriptID != 0) {
+                                                    await getAllFolderContents(ClientLevelPagemajikScriptID,
+                                                        fileRepFolderId, "CLPM.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/CLPM.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    // unzip(os.homedir() + "/PageMajik/CLPM.zip", scriptsPath);
+                                                }
+
+
+
+                                                if (BookLevelAdobeScriptID != 0) {
+                                                    await getAllFolderContents(BookLevelAdobeScriptID,
+                                                        fileRepFolderId, "BLAdobe.zip")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/BLAdobe.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //  unzip(os.homedir() + "/PageMajik/BLAdobe.zip", scriptsPath)
+                                                }
+
+                                                if (BookLevelPagemajikScriptID != 0) {
+                                                    await getAllFolderContents(BookLevelPagemajikScriptID,
+                                                        fileRepFolderId, "BLPM.zip")
+                                                    //fse.ensureDirSync(supportPath +"/Instruction/")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/BLPM.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+                                                    //  unzip(os.homedir() + "/PageMajik/BLPM.zip", scriptsPath);
+                                                }
+
+                                                if (InstructionID != 0) {
+                                                    await getAllFolderContents(InstructionID,
+                                                        fileRepFolderId, "InstructionID.zip")
+                                                    fse.ensureDirSync(supportPath + "/Instruction/")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/InstructionID.zip");
+                                                    zip.extractAllTo( /*target path*/ scriptsPath, /*overwrite*/
+                                                        true);
+
+                                                    //  unzip(os.homedir() + "/PageMajik/InstructionID.zip", supportPath +"/Instruction/");
+                                                }
+
+                                                prepend(scriptsPath1 +
+                                                    "AutoPagination_Processor_Caller.jsx",
+                                                    javascriptContent,
+                                                    function (err) {
+                                                        if (err) {
+                                                            return console.log(err);
+                                                        }
+
+                                                        console.log("The ScriptsFile is saved!");
+                                                    });
+
+                                                if (LibraryID != 0) {
+                                                    await getAllFolderContents(LibraryID,
+                                                        fileRepFolderId, "LibraryID.zip")
+                                                    fse.ensureDirSync(supportPath + "/Library/")
+                                                    var zip = new AdmZip(os.homedir() +
+                                                        "/PageMajik/LibraryID.zip");
+                                                    zip.extractAllTo( /*target path*/ supportPath +
+                                                        "/Library/", /*overwrite*/
+                                                        true);
+
+                                                    //  unzip(os.homedir() + "/PageMajik/InstructionID.zip", supportPath +"/Instruction/");
+                                                }
+
+                                                var completedFN = filename.replace(/\.[^/.]+$/,
+                                                    "_Completed.txt")
+                                                var idmlfilename = filename.replace(/\.[^/.]+$/,
+                                                    ".idml")
+                                                var pdffilename = filename.replace(/\.[^/.]+$/,
+                                                    ".pdf")
+                                                var supportPath2 = supportPath.replace(/\//g, '\\')
+                                                supportPath2 = supportPath2.replace(/\/\//g, '\\')
+                                                console.log(supportPath2 + completedFN);
+                                                await runIndesignScript(scriptsPath +
+                                                    "AutoPagination_Processor_Caller.jsx",
+                                                    scriptsPath)
+                                                console.log("Am done waiting too")
+                                                fileExists(supportPath2 + completedFN).then(
+                                                    exists => {
+                                                        console.log(exists) // OUTPUTS: true or false
+                                                        if (exists == true) {
+                                                            Console.log("TRUE")
+                                                            // checkEx = true;
+                                                        } else {
+                                                            console.log("FALSE")
+                                                            var watcher = chokidar.watch(
+                                                                supportPath2, {
+                                                                    persistent: true
+                                                                });
+
+                                                            // Something to use when events are received.
+                                                            var log = console.log.bind(console);
+                                                            // Add event listeners.
+                                                            watcher
+                                                                .on('add', async function (path) {
+                                                                    console.log(path)
+
+                                                                    if (path == supportPath2 +
+                                                                        completedFN) {
+                                                                        javascriptContent = "";
+                                                                        retry = 0;
+                                                                        await addorupdatefile(
+                                                                            fileRepFolderId,
+                                                                            fileFolderId,
+                                                                            completedFN,
+                                                                            supportPath2 +
+                                                                            completedFN,
+                                                                            companyID,
+                                                                            fileuserID, "indd")
+                                                                        fse.removeSync(scriptsPath);
+
+                                                                        pending_start();
+                                                                    }
+                                                                    /* fileExists(supportPath2 +
+                                                                            completedFN)
+                                                                        .then(exists => {
+                                                                            console.log(exists) // OUTPUTS: true or false
+                                                                            if (exists == true) {
+                                                                                Console.log("Got the file")
+                                                                                // checkEx = true;
+                                                                            } else {
+                                                                                console.log("FALSE")
+                                                                            }
+                                                                        }) */
+                                                                })
+                                                            /* .on('change', path => log(
+                                                                `File ${path} has been changed`))
+                                                            .on('unlink', path => log(
+                                                                `File ${path} has been removed`)); */
+
+                                                            // More possible events.
+                                                            watcher
+                                                                .on('addDir', path => log(
+                                                                    `Directory ${path} has been added`
+                                                                ))
+                                                                .on('unlinkDir', path => log(
+                                                                    `Directory ${path} has been removed`
+                                                                ))
+                                                                .on('error', error => log(
+                                                                    `Watcher error: ${error}`))
+                                                                .on('ready', () => log(
+                                                                    'Initial scan complete. Ready for changes'
+                                                                ))
+                                                            /* .on('raw', (event, path, details) => {
+                                                                log('Raw event info:', event, path,
+                                                                    details); 
+                                                            }); */
+                                                        }
+                                                    })
+
+                                            }
+
+                                            //no library download for generate proof
+
+                                        },
+                                        function (err) {
+                                            console.log(err);
+                                        })
+
+
+
+
+
+
+                                },
+                                function (err) {
+                                    console.log(err);
+                                })
+
+                        }
+                    },
+                    function (err) {
+                        console.log(err);
+                    })
+
+            } else {
+                console.log("Creds or site incomplete")
+            }
+        }
+
+
+        function getFileObject(fileEntryID) {
+            // var pending_files = "http://process:1234@" + URL_PAGEMAJIK_PENDING + "/group-ids/" + selectedSites + "/indd-version/" + "CS6";
+            var localID = fileEntryID
+            var tmpGFO = URL_FileVersion + localID;
+            console.log(JSON.stringify(tmpGFO))
+            var optionsGFO = {
+                method: 'GET',
+                uri: tmpGFO,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 30000,
+                resolveWithFullResponse: true
+            };
+            // console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsGFO)
+                    .then(function (response) {
+                        // POST succeeded...
+                        //   console.log(JSON.parse(response.body))
+                        var currentGFO = JSON.parse(response.body)
+
+                        return resolve(currentGFO);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err);
+                        getFileObject(localID);
+                        return reject(err);
+
+                    });
+            })
+        }
+
+
+        function cancel_checkout_download(fileEntryID, fileRepFolderId) {
+            var tmpCCD = URL_cancelCheckout_download + fileEntryID + "/group-id/" + fileRepFolderId +
+                "/status/In%20Progress/option/1";
+            console.log(JSON.stringify(tmpCCD))
+            var optionsCCD = {
+                method: 'POST',
+                uri: tmpCCD,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 30000,
+                resolveWithFullResponse: true
+            };
+            //  console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsCCD)
+                    .then(function (response) {
+                        // POST succeeded...
+                        //   console.log(JSON.parse(response.body))
+                        var currentCCD = JSON.parse(response.body)
+                        return resolve(currentCCD);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        // cancel_checkout_download(fileEntryID, fileRepFolderId)
+                        return reject(err);
+                    });
+            })
+        }
+
+
+        function getAllFolderID(fileEntryID, fileRepFolderId) {
+            var tmpGAF = URL_cancelCheckout_download + fileEntryID + "/group-id/" + fileRepFolderId +
+                "/status/In%20Progress/option/2";
+            console.log(JSON.stringify(tmpGAF))
+            var optionsGAF = {
+                method: 'POST',
+                uri: tmpGAF,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 30000,
+                resolveWithFullResponse: true
+            };
+            // console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsGAF)
+                    .then(function (response) {
+                        // POST succeeded...
+                        //   console.log(JSON.parse(response.body))
+                        var currentGAF = JSON.parse(response.body)
+                        return resolve(currentGAF);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        retry++;
+                        if (retry < 2) {
+                            getAllFolderID(fileEntryID, fileRepFolderId)
+                        }
+                        return reject(err);
+                    });
+            })
+        }
+
+
+
+        function getAllFolderContents(ID, gGroupID, zipName) {
+            var tmpGAFC = URL_getAllFiles + ID + "/group-id/" + gGroupID;
+            console.log(JSON.stringify(tmpGAFC))
+            var optionsGAFC = {
+                method: 'POST',
+                uri: tmpGAFC,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 120000,
+                resolveWithFullResponse: true
+            };
+            // console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsGAFC)
+                    .then(function (response) {
+                        // POST succeeded...
+                        console.log(JSON.parse(response.body))
+                        var currentGAFC = JSON.parse(response.body)
+
+                        console.log(SITE_URL + currentGAFC)
+                        rp.get({
+                            uri: SITE_URL + currentGAFC,
+                            auth: {
+                                'user': DEFAULT_USER,
+                                'pass': DEFAULT_PASS
+                            }
+                        }).pipe(fs.createWriteStream(os.homedir() + "/PageMajik/" + zipName)).on(
+                            'finish',
+                            function (line) {
+                                console.log("Finished Parsing " + zipName);
+                                return resolve();
+                            });
+
+                        // fs.createReadStream(os.homedir() + "/PageMajik/myzip.zip").pipe(unzip.Extract({ path: scriptsPath }));
+
+                        console.log("Done")
+                        // return resolve();
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        retry++;
+                        if (retry < 3) {
+                            // getAllFolderID(fileEntryID)
+                            getAllFolderContents(ID, gGroupID, zipName)
+                        }
+                        return reject(err);
+                    });
+            })
+        }
+
+        function unzip(fileDir, fileDest) {
+            yauzl.open(fileDir, {
+                lazyEntries: true
+            }, function (err, zipfile) {
+                if (err) throw err;
+                zipfile.readEntry();
+                zipfile.on("entry", function (entry) {
+                    if (/\/$/.test(entry.fileName)) {
+                        // Directory file names end with '/'.
+                        // Note that entires for directories themselves are optional.
+                        // An entry's fileName implicitly requires its parent directories to exist.
+                        zipfile.readEntry();
+                    } else {
+                        // file entry
+                        zipfile.openReadStream(entry,
+                            function (err,
+                                readStream) {
+                                if (err) throw err;
+                                readStream.on("end",
+                                    function () {
+                                        zipfile
+                                            .readEntry();
+                                    });
+                                readStream.pipe(
+                                    fileDest
+                                );
+                            });
+                    }
+                });
+            });
+        }
+
+
+
+        function runIndesignScript(scriptName, scriptsPath) {
+            EXT_PATH = localStorage.getItem('EXT_PATH')
+            //EXT_PATH = EXT_PATH.replace(/\\/g, '/');
+            // EXT_PATH = EXT_PATH.replace(/\s/g, '\\ ');
+            cmd.get(
+                "\"" + EXT_PATH + "\" -run \"" + scriptName + "\"",
+                function (err, data, stderr) {
+                    console.log('the current working dir is : ', data)
+                    return new Promise(function (resolve, reject) {
+                        if (err == null) {
+                            //console.log(stderr)
+                            return resolve(stderr);
+                        } else {
+                            //console.log(err)
+                            return reject(err);
+                        }
+                    });
+                })
+        }
+
+
+        async function addorupdatefile(fileRepFolderId, fileFolderId, completedFN, completedfilepath, companyID,
+            fileuserID, type) {
+            console.log(completedfilepath)
+            console.log(fileFolderId);
+            var mimeType
+
+            if (type == "pdf") {
+                mimeType = "application/vnd.adobe.indesign-idml-package";
+            }
+            if (type == "indd") {
+                mimeType = "application/vnd.adobe.indesign-idml-package";
+            }
+            if (type == "idml") {
+                mimeType = "application/vnd.adobe.indesign-idml-package";
+            }
+
+
+            var mimeType = "application/vnd.adobe.indesign-idml-package";
+            var descripton = "-description"
+            var changelog = "-change-log"
+            var tmpAOUF = SITE_URL + "/api/jsonws/Dazzle-portlet.pagemajik/add-or-update" //repository-id" + fileRepFolderId + "/folder-id/" +
+            //   fileFolderId + "/folder-id/" +fileFolderId + "/source-file-name/" + completedFN + "/" + memetype + "/title/" + completedFN + "/" +
+            //    descripton + "/" + changelog;
+            console.log(JSON.stringify(tmpAOUF))
+            var optionsAOUF = {
+                method: 'POST',
+                url: tmpAOUF,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                //timeout: 30000,
+                formData: {
+                    repositoryId: fileRepFolderId,
+                    folderId: fileFolderId,
+                    sourceFileName: completedFN,
+                    mimeType: mimeType,
+                    title: completedFN,
+                    description: "",
+                    changeLog: "",
+                    file: fs.createReadStream(completedfilepath)
+                },
+                // json: true
+                // resolveWithFullResponse: true
+            };
+            // console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsAOUF)
+                    .then(function (response) {
+                        // POST succeeded...
+                        //   console.log(JSON.parse(response.body))
+                        //var currentCFEBN = JSON.parse(response.body)
+                        console.log(response)
+                        return resolve(response);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        // getAllFolderID(fileEntryID)
+                        return reject(err);
+                    });
+            })
+        }
+
+        /*   function addFileEntry(fileRepFolderId, fileFolderId, completedFN, completedfilepath, companyID, fileuserID) {
+
+              var memetype = "-meme-type";
+              var descripton = "-description"
+              var changelog = "-change-log"
+              var tmpAFE = SITE_URL + "/api/jsonws/dlapp/add-file-entry/repository-id/" + fileRepFolderId + "/folder-id/" +
+                  fileFolderId + "/source-file-name/" + completedFN + "/" + memetype + "/title/" + completedFN + "/" +
+                  descripton + "/" + changelog;
+              console.log(JSON.stringify(tmpAFE))
+              var optionsAFE = {
+                  method: 'POST',
+                  uri: tmpAFE,
+                  auth: {
+                      'user': DEFAULT_USER,
+                      'pass': DEFAULT_PASS
+                  },
+                  timeout: 50000,
+                  formData: {
+                      file: fs.createReadStream(completedfilepath)
+                  },
+                  //resolveWithFullResponse: true
+              };
+              // console.log(fileEntryID)
+
+              // Return new promise 
+
+              return new Promise(function (resolve, reject) {
+                  // Do async job
+                  rp(optionsAFE)
+                      .then(function (response) {
+                          // POST succeeded...
+                          //   console.log(JSON.parse(response.body))
+                          //var currentCFEBN = JSON.parse(response.body)
+                          console.log(response)
+                          return resolve(response);
+
+                      })
+                      .catch(function (err) {
+                          // POST failed...
+                          console.log(err)
+                          // getAllFolderID(fileEntryID)
+                          return reject(err);
+                      });
+              })
+
+
+
+          } */
+
+
+
+
+
+
+        function checkmount() {
+            if (mountFirst) {
+
+                try {
+
+                    driveMount();
+
+                    //  console.log(response1)
+                } catch (err) {
+                    console.log("Error");
+                    driveMounted = false;
+                }
+
+            } else {
+                pending_start();
+            }
+        }
+
+        async function getServerPathSync(fileRepFolderId, artFolderId) {
+            var tmpGSP = SITE_URL + "/api/jsonws/RSync-Portlet-portlet.rsync/create-folder-structure/folder-id/" +
+                artFolderId +
+                "/grp-id/" + fileRepFolderId + "/filevalue/" + "0";
+            console.log(JSON.stringify(tmpGSP))
+            var optionsGSP = {
+                method: 'POST',
+                uri: tmpGSP,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 30000,
+                resolveWithFullResponse: true
+            };
+            //  console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsGSP)
+                    .then(function (response) {
+                        // POST succeeded...
+                        //   console.log(JSON.parse(response.body))
+                        var currentGSP = JSON.parse(response.body)
+                        return resolve(currentGSP);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        // cancel_checkout_download(fileEntryID, fileRepFolderId)
+                        return reject(err);
+                    });
+            })
+
+        }
+
+        function getwebDavURL() {
+            var url1 = URL(SITE_URL);
+            var urlport;
+            var wDU;
+            /*console.log(url.hostname); */
+            localStorage.setItem("hostname", url1.hostname)
+            // console.log(url1.port);
+            if (url1.port) {
+                urlport = '@' + url1.port;
+                wDU = "\\\\" + url1.hostname + urlport + "\\webdav";
+            } else {
+                wDU = "\\\\" + url1.hostname + "\\webdav";
+            }
+            return wDU;
+        }
+
+        function rsyncFetch(filepath, destination, key, instancelogin) {
+
+            //	var OS = OS
+            var filepath = filepath
+            var destination = destination
+            var key = key
+            var hostname = instancelogin
+            process1.env.PATH = "C:/windows/system32";
+            console.log(process1.env.PATH)
+            // console.log(supportPath)
+            /*  if (!fs.existsSync(os.homedir() + "/supportPath")) {
+                 fs.mkdirSync(os.homedir() + "/supportPath");
+             } */
+
+            //Example
+
+            //    var key = "c:/Work/Rsync/Rsync/uploadingserver.pem"
+
+            //  var hostname = "ubuntu@ec2-54-237-212-163.compute-1.amazonaws.com"
+
+            //  var filepath = "/opt/tmp"
+
+            //   var destination = "c:/Work/Rsync/Rsync/"
+            var patt = /([\s])/g;
+            key = "C:/Subash/key/online/pagemajik-com-net.pem";
+            //    key = key.replace(patt, '\\$1');
+            hostname = "ubuntu@ec2-34-232-189-147.compute-1.amazonaws.com";
+
+            if (process.platform === 'darwin') {
+
+                //sample command
+                //child = exec("rsync -Pav -e \"ssh -i "+key+"\" "+hostname+":"+filepath+ " "+destination)
+                //rsync -avre "ssh -i uploadingserver.pem" ubuntu@ec2-54-80-249-39.compute-1.amazonaws.com:/opt/tmp /Users/rd/Desktop/Subash/Temp/
+
+                var child = exec("rsync --inplace -avre \"ssh -i \'" + key + "\'\" " + "\"" + hostname + ":" + filepath +
+                    "\"" +
+                    " .", {
+                        cwd: os.homedir() + destination
+                    },
+                    function (error, stdout, stderr) {
+                        console.log('stdout: ' + stdout);
+                        console.log('stderr: ' + stderr);
+                        if (error !== null) {
+                            console.log('exec error: ' + error);
+                        }
+                    });
+                child.stdout.on('data', function (data) {
+                    //pendingfiles();
+                    return new Promise(function (resolve, reject) {
+                        // Do async job
+                        return resolve("Completed Sync");
+                    })
+                })
+
+            } else {
+                var child = exec(
+                    "C:/cygwin64/bin/rsync.exe --inplace -avre  \"C:/cygwin64/bin/ssh.exe -o StrictHostKeyChecking=no -i \'" +
+                    key + "\'\"  \"" + hostname + ":" + filepath + "\" .", {
+                        cwd: destination
+                    });
+                child.stdout.on('data', function (data) {
+                    //pendingfiles();
+                    // return new Promise(function (resolve, reject) {
+                    // Do async job
+                    console.log(data)
+
+                    // })
+                })
+                /*   var child = exec('cmd.exe',
+                      "C:/cygwin/bin/rsync.exe --inplace -avre  \"C:/cygwin/bin/ssh.exe -o StrictHostKeyChecking=no -i \'" +
+                      key + "\'\"  \"" + hostname + ":" + filepath + "\" .", {
+                          cwd: os.homedir() + destination
+                      },
+                      function () {})
+                  child.stdout.on('data', function (data) {
+                      //pendingfiles();
+                      return new Promise(function (resolve, reject) {
+                          // Do async job
+                          return resolve("Completed Sync");
+                      })
+                  }) */
+                child.stderr.on('data', function (data) {
+                    //pendingfiles();
+                    return new Promise(function (resolve, reject) {
+                        // Do async job
+
+                        return reject(data);
+                    })
+                })
+                child.on("close", function () {
+
+                    // Do async job
+
+                    console.log(scriptsPath)
+
+                    fse.ensureDirSync(destination + 'Fonts');
+                    fse.ensureDirSync(destination + 'Art');
+
+                    try {
+                        fse.move(destination + "Fonts/", destination + "Document fonts", {
+                            overwrite: true
+                        }, err => {
+                            if (err) return console.error(err)
+
+                            console.log('success!')
+                        })
+                    } catch (error) {
+
+                    }
+
+
+                    try {
+                        fse.move(destination + "Art/", destination + "Links", {
+                            overwrite: true
+                        }, err => {
+                            if (err) return console.error(err)
+
+                            console.log('success!')
+                        })
+                    } catch (error) {
+
+                    }
+
+
+                    try {
+                        copy(destination + "Adobe\ Scripts", os.homedir() +
+                            "/Documents/Adobe\ Scripts",
+                            function (error, results) {
+                                if (error) {
+                                    console.error('Copy failed: ' + error);
+                                } else {
+                                    console.info('Copied ' + results.length + ' files');
+                                }
+                            });
+                    } catch (error) {
+
+                    }
+
+                    try {
+                        copy(destination + "PageMajik", os.homedir() +
+                            "/Documents/Adobe\ Scripts",
+                            function (error, results) {
+                                if (error) {
+                                    console.error('Copy failed: ' + error);
+                                } else {
+                                    console.info('Copied ' + results.length + ' files');
+                                    console.log("Done with sync")
+                                    return resolve("done");
+                                }
+                            });
+                    } catch (error) {
+
+                    }
+
+
+
+                    heimdall = true;
+                    localStorage.setItem("heimdall", "true")
+
+                })
+
+        }
+        }
+    </script>
+
+
+    <!--http://process:1234@springer.pagemajik.online/api/jsonws/Dazzle-portlet.pag…y-file-name/status/Pending/group-ids/20181,986207,107367,/indd-version/CS6-->
+
+
+
+
+</body>
+
+</html>
