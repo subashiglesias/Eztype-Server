@@ -32,7 +32,8 @@
                         <div class="login_form">
                             <!--  FORM START  -->
                             <label for="siteName">sitename</label>
-                            <input id="siteName" type="text" class="login_input" placeholder="https://" autofocus required>
+                            <input id="siteName" type="text" class="login_input" placeholder="https://" autofocus
+                                required>
                             <label for="userName">username</label>
                             <input id="userName" type="text" class="login_input" placeholder="username" required>
                             <label for="password">password</label>
@@ -176,7 +177,8 @@
                         <!--  END  -->
                         <ul class="nav nav-pills">
                             <li class="active">
-                                <a data-toggle="pill" href="#menu1" class="active show" style="border-left: none;">In Progress</a>
+                                <a data-toggle="pill" href="#menu1" class="active show" style="border-left: none;">In
+                                    Progress</a>
                             </li>
                             <!-- <li>
                                 <a data-toggle="pill" href="#menu2" onclick="refreshcdata()">Completed</a>
@@ -260,7 +262,6 @@
         var http = nodeRequire('http');
         var miscellaneousFolderID = "";
         var prepend = nodeRequire('prepend-file');
-        var download = nodeRequire('download-file')
         var cmd = nodeRequire('node-cmd');
         var chokidar = nodeRequire('chokidar');
         var webdav = nodeRequire('./windows.js')
@@ -271,6 +272,12 @@
         var osascript = nodeRequire('node-osascript');
         const fixPath = nodeRequire('fix-path')();
         var copy = nodeRequire('recursive-copy');
+        const util = nodeRequire('util');
+        nodeRequire('util.promisify').shim();
+        const setTimeoutPromise = util.promisify(setTimeout);
+        var email = nodeRequire("emailjs");
+
+
 
         //var applescript = nodeRequire('applescript');
         var heimdall;
@@ -293,6 +300,7 @@
         var URL_getAllFiles;
         var FailedFiles = [];
         var process1 = app.process;
+
         //  console.log(hostname)
 
         var SITE_URL
@@ -303,7 +311,7 @@
 
         var webDavURL;
         var dat;
-        var pagenum = 1;
+        var pagenum = null;
         var First = true;
         var batdat;
         var drivemounted = false;
@@ -372,6 +380,13 @@
         var max = 0
         var min = 0
 
+        var server = email.server.connect({
+            user: "support@pagemajik.com",
+            password: "PageMajik.99",
+            host: "smtp.gmail.com",
+            ssl: true
+        });
+
         localStorage.setItem("completedjson", JSON.stringify(jsonobj))
         localStorage.setItem("failedjson", JSON.stringify(jsonfobj))
 
@@ -385,7 +400,7 @@
             Object.entries(process1.memoryUsage()).map(logBytes)
         }
 
-        
+
 
         // webFrame.setZoomFactor(2)
 
@@ -794,14 +809,14 @@
         function pending_start() {
             first = false;
             console.log("Am in")
-            console.log(process1.memoryUsage().heapUsed)
-            console.log(process1.memoryUsage().heapTotal)
-            console.log(webFrame.getResourceUsage())
+            //  console.log(process1.memoryUsage().heapUsed)
+            //   console.log(process1.memoryUsage().heapTotal)
+            //   console.log(webFrame.getResourceUsage())
             webFrame.clearCache()
-            getMemory();
-           // global.gc
+            //  getMemory();
+            // global.gc
             //   console.log(document.getResourceUsage())
-           // gc++;
+            // gc++;
             EXT_PATH = localStorage.getItem('EXT_PATH')
             localStorage.setItem("SSites", selectedSites)
             localStorage.setItem("SId", selectedId)
@@ -849,7 +864,7 @@
                             clearTimeout(
                                 timer);
                             if (min == 0 && max == 0) {
-                                setTimeout(pending_start, 10)
+                                setTimeout(pending_start, 5000)
                             } else {
                                 var rand = _.random(min, max)
                                 setTimeout(pending_start, (5000 + (rand * 1000)))
@@ -956,7 +971,8 @@
 
                                     addFileToInProgress(filename);
 
-                                    getUserIdByScreenName(companyID, DEFAULT_USER).then(function (result) {
+                                    getUserIdByScreenName(companyID, DEFAULT_USER).then(function (
+                                        result) {
                                         ezTypeUserID = result;
                                     });
 
@@ -965,8 +981,12 @@
                                         fileRepFolderId).then(function (result) {
                                         console.log(result)
                                         BookMapID = result.BookMap
-                                        getBookmapPageNumber(BookMapID, filename).then(function (result) {
-                                            console.log("PageNum is " + JSON.stringify(result));
+                                        ReviewID = result.Review;
+                                        SupportID = result.Support;
+                                        getBookmapPageNumber(BookMapID, filename).then(function (
+                                            result) {
+                                            console.log("PageNum is " + JSON.stringify(
+                                                result));
                                             if (JSON.stringify(result) == "{}") {
                                                 //pagenum = 10
                                                 pagenum = 1
@@ -977,23 +997,9 @@
                                         })
                                     })
 
-                                    // console.log(Object.values(bkmap))
-                                    //   console.log(ids.BookMap)
-                                    //   BookMapID = ids.BookMap 
-
-
-
 
                                     inddokay = true;
 
-                                    //  console.log(filename);
-                                    //   console.log(fileFolderId);
-                                    //   console.log(fileRepFolderId);
-                                    //   console.log(fileExtension);
-                                    //   console.log(fileMimeType);
-                                    //  console.log(fileDescription);
-                                    //   console.log(fileTreePath);
-                                    //   console.log(companyID);
                                     //    console.log(fileuserID);
                                     var downloadPath = PAGEMAJIK_DOWNLOAD_PATH + fileRepFolderId +
                                         "/" +
@@ -1017,8 +1023,9 @@
                                             bfileEntryId = fileEntryId;
                                             var received_bytes;
                                             url = SITE_URL + downloadURL;
-                                            scriptsPath = os.homedir() + "/" + "Documents/Adobe Scripts/" +
-                                                fileEntryID + "/"
+                                            scriptsPath = os.homedir() + "/" +
+                                                "Documents/Adobe Scripts/" +
+                                                fileFolderId + "/"
                                             indesignScriptPath = scriptsPath;
                                             fse.ensureDirSync(scriptsPath)
 
@@ -1068,8 +1075,15 @@
                                             indesignScriptPath = indesignScriptPath.replace(
                                                 /\\/g, '\\') */
                                             javascriptContent = '';
-
-                                            
+                                            javascriptContent = javascriptContent +
+                                                " var	statusfileuserID = \"" +
+                                                statusfileuserID + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var	ezTypeUserID = \"" +
+                                                ezTypeUserID + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var	siteURL = \"" +
+                                                SITE_URL + "\"" + "\n"
                                             javascriptContent = javascriptContent +
                                                 " var	inputFilePath = \"" +
                                                 indesignScriptInpPath + "\"" + "\n"
@@ -1092,7 +1106,7 @@
                                                 " var userCred = \"" +
                                                 DEFAULT_PASS + "\"" + "\n"
                                             javascriptContent = javascriptContent +
-                                                " var fileEntryId = \"" +
+                                                " var fileEntryID = \"" +
                                                 fileEntryID + "\"" + "\n"
                                             javascriptContent = javascriptContent +
                                                 " var process = \"" +
@@ -1130,6 +1144,15 @@
                                             javascriptContent = javascriptContent +
                                                 " var slugLineInfo = \"" +
                                                 stage + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var bookMapID = \"" +
+                                                BookMapID + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var ReviewID = \"" +
+                                                ReviewID + "\"" + "\n"
+                                            javascriptContent = javascriptContent +
+                                                " var SupportID = \"" +
+                                                SupportID + "\"" + "\n"
 
                                             console.log(javascriptContent);
                                             // console.log(downloadURL)
@@ -1210,7 +1233,7 @@
                                                 var loki = false;
                                                 FontsID = result.Fonts;
                                                 BookLevelAdobeScriptID = result.BookLevelAdobeScript;
-                                                SupportID = result.Support;
+
                                                 LibraryID = result.Library;
                                                 PresetID = result.Preset;
                                                 SiteLevelAdobeScriptID = result.SiteLevelAdobeScript;
@@ -1219,12 +1242,13 @@
                                                 InstructionID = result.Instruction;
                                                 SiteLevelPagemajikScriptID = result.SiteLevelPagemajikScript;
                                                 BookLevelPagemajikScriptID = result.BookLevelPagemajikScript;
-                                                ReviewID = result.Review;
+
                                                 MiscellaneousID = result.Miscellaneous;
                                                 artFolderId = result.Art;
                                                 commonArtFolderId = result.CommonArt
                                                 BookMapID = result.BookMap;
                                                 contents = "%5B";
+
                                                 //  if (artFolderId != 0) {
                                                 //contents.push(artFolderId);
                                                 contents = contents + artFolderId
@@ -1232,13 +1256,15 @@
 
                                                 if (commonArtFolderId != 0) {
                                                     //contents.push(commonArtFolderId);
-                                                    contents = contents + "%2C" + commonArtFolderId;
+                                                    contents = contents + "%2C" +
+                                                        commonArtFolderId;
                                                 }
 
                                                 if (PresetID != 0) {
                                                     //contents.push(commonArtFolderId);
                                                     contents = contents + "%2C" + PresetID;
-                                                    presetFileName = await getPresetFilename(filePresetID);
+                                                    presetFileName = await getPresetFilename(
+                                                        filePresetID);
                                                     console.log(presetFileName)
                                                 }
                                                 /* var serverPath = await getServerPathSync(
@@ -1261,12 +1287,15 @@
                                                     " " + LibraryID + " " + PresetID + " " +
                                                     SiteLevelAdobeScriptID + " " +
                                                     ClientLevelAdobeScriptID +
-                                                    " " + ClientLevelPagemajikScriptID + " " +
+                                                    " " + ClientLevelPagemajikScriptID +
+                                                    " " +
                                                     InstructionID +
                                                     " " + SiteLevelPagemajikScriptID + " " +
-                                                    BookLevelPagemajikScriptID + " " + ReviewID +
+                                                    BookLevelPagemajikScriptID + " " +
+                                                    ReviewID +
                                                     " " +
-                                                    MiscellaneousID + " " + commonArtFolderId)
+                                                    MiscellaneousID + " " +
+                                                    commonArtFolderId)
                                                 EXT_PATH = localStorage.getItem('EXT_PATH')
                                                 EXT_PATH = EXT_PATH.replace(/ /g, "\\ ")
 
@@ -1276,11 +1305,23 @@
                                                 "", ezTypeUserID, filename + " " + display +
                                                 " running.", false, fileuserID);*/
 
-
-                                                if (process.match("Auto Correction") || process.match(
+                                                if (process.match("Auto Correction") || process
+                                                    .match(
                                                         "First Proof")) {
 
-                                                    generateProof();
+                                                    try {
+                                                        await generateProof();
+                                                    } catch (error) {
+                                                        console.log("Error Generate Proof" +
+                                                            error)
+                                                        sendmail("Generate Proof Failed ",
+                                                            "Generate Proof failed for file " +
+                                                            filePath + " with error " +
+                                                            error)
+                                                        startpen()
+                                                        return
+                                                    }
+                                                    //  generateProof();
                                                     //runIndesignScript(scriptsPath + "PDF_Generator.jsx", scriptsPath);
 
 
@@ -1288,8 +1329,21 @@
 
                                                 if (process.match("Word to IDML")) {
 
-                                                    generateIndesign();
+                                                    try {
+                                                        await generateIndesign();
+                                                    } catch (error) {
+                                                        console.log("Error Generate Indesign" +
+                                                            error)
+                                                        sendmail("Generate Indesign Failed  ",
+                                                            "Generate Indesign failed for file " +
+                                                            filePath + " with error " +
+                                                            error)
+                                                        startpen()
+                                                        return
+                                                    }
+
                                                 }
+
                                                 //no library download for generate proof
 
                                             },
@@ -1303,7 +1357,7 @@
                                             "<span>" + "Unable to get Indesign file... Moving on" +
                                             "</span>" +
                                             "</div>")
-                                        gotonextfile();
+                                        // gotonextfile();
                                     }
                                 },
                                 function (err) {
@@ -1424,11 +1478,45 @@
                         "The ScriptsFile is saved!"
                     );
                 }); */
-            heimdall = await rsyncFetch(serverPath,
-                supportPath, "", "")
+            try {
+                heimdall = await rsyncFetch(serverPath,
+                    supportPath, "", "")
+            } catch (error) {
+                console.log("Rsync failed.. gonna retry 1")
+                try {
+                    heimdall = await rsyncFetch(serverPath,
+                        supportPath, "", "")
+                } catch (error) {
+                    console.log("retry 1 failed")
+                    console.log("Rsync failed.. gonna retry 2")
+                    try {
+                        heimdall = await rsyncFetch(serverPath,
+                            supportPath, "", "")
+                    } catch (error) {
+                        console.log("retry 2 failed")
+                        console.log("Rsync failed.. gonna retry 3")
+                        try {
+                            heimdall = await rsyncFetch(serverPath,
+                                supportPath, "", "")
+                        } catch (error) {
+                            console.log("retry 3 failed")
+                            console.log("I have failed enough")
+
+                            startpen();
+                            sendmail("Rsync failed ", "Rsync Failed for file " + filename)
+                            return
+                        }
+                    }
+                }
+            }
 
 
-            //   removefile(removepath);
+            try {
+                removefolderpath(removepath);
+
+            } catch (error) {
+                console.log("Unable to remove folder path")
+            }
 
 
             /* console.log(SITE_URL +
@@ -1462,7 +1550,7 @@
                         'tell application "Finder" to open POSIX file \"' +
                         fontsFolderPath + "/" + file + '\"',
                         function (err, result, raw) {
-                            if (err) return console.error(
+                            if (err) return console.log(
                                 err)
                             console.log(result, raw)
                         });
@@ -1497,7 +1585,7 @@
                 if (heimdall == "true") {
                     console.log("The gatekeeper allowed me")
                     if (currentrun) {
-                        runIndesignScript(scriptsPath)
+                        runIndesignScript(scriptsPath, "AUTO")
                         startpen()
                     }
                 } else {
@@ -1601,11 +1689,44 @@
                         "The ScriptsFile is saved!"
                     );
                 }); */
-            retry = 0
-            heimdall = await rsyncFetch(serverPath,
-                supportPath, "", "")
+            try {
+                heimdall = await rsyncFetch(serverPath,
+                    supportPath, "", "")
+            } catch (error) {
+                console.log("Rsync failed.. gonna retry 1")
+                try {
+                    heimdall = await rsyncFetch(serverPath,
+                        supportPath, "", "")
+                } catch (error) {
+                    console.log("retry 1 failed")
+                    console.log("Rsync failed.. gonna retry 2")
+                    try {
+                        heimdall = await rsyncFetch(serverPath,
+                            supportPath, "", "")
+                    } catch (error) {
+                        console.log("retry 2 failed")
+                        console.log("Rsync failed.. gonna retry 3")
+                        try {
+                            heimdall = await rsyncFetch(serverPath,
+                                supportPath, "", "")
+                        } catch (error) {
+                            console.log("retry 3 failed")
+                            console.log("I have failed enough")
 
-            //    removefile(removepath);
+                            startpen();
+                            sendmail("Rsync failed ", "Rsync Failed for file " + filename)
+                            return
+                        }
+                    }
+                }
+            }
+
+            try {
+                removefolderpath(removepath);
+
+            } catch (error) {
+                console.log("Unable to remove folder path")
+            }
 
 
             console.log(SITE_URL +
@@ -1682,7 +1803,7 @@
                 if (heimdall == "true") {
                     console.log("The gatekeeper allowed me")
                     if (currentrun) {
-                        runIndesignScript(scriptsPath)
+                        runIndesignScript(scriptsPath, "PDF")
                         startpen()
                     }
                 } else {
@@ -1813,7 +1934,7 @@
                             "", ezTypeUserID, filename + " " + display +
                             "Unexpected Error. Kindly run the file again ", false,
                             statusfileuserID);
-                        gotonextfile(); // need to work on it - File checked in by me, but i don't have download path ?? coz i missed my window, now no file
+                        // gotonextfile(); // need to work on it - File checked in by me, but i don't have download path ?? coz i missed my window, now no file
                         return reject(err);
                     });
             })
@@ -1938,12 +2059,20 @@
             })
         }
 
-        function runIndesignScript(scriptsPath) {
+        function runIndesignScript(scriptsPath, type) {
+
+
+            var processtype = null;
+            if (type == "AUTO") {
+                processtype = "AutoPagination_Processor_Caller.jsx"
+            } else {
+                processtype = "PDF_Generator.jsx"
+            }
 
 
             var tmpscript = scriptsPath.replace(" ", "%20")
             var tmpIND = "http://localhost:8080/com.adobe.clover.application/api/idsqueue/EnqueueJob?scriptName=" +
-                tmpscript + "PDF_Generator.jsx&jobName=test1&priority=.5&queueName=Default&maximumRetryCount=3"
+                tmpscript + processtype + "&jobName=test1&priority=.5&queueName=Default&maximumRetryCount=3"
             console.log(JSON.stringify(tmpIND))
             var optionsIND = {
                 method: 'GET',
@@ -2038,6 +2167,19 @@
         }
 
 
+        async function sendmail(subject, message) {
+            server.send({
+                text: message,
+                from: "support@pagemajik.com",
+                to: "support@pagemajik.com",
+                cc: "bhaskara@pagemajik.com",
+                subject: subject
+            }, function (err, message) {
+                console.log(err || message);
+            });
+        }
+
+
         async function addorupdatefile(fileRepFolderId, fileFolderId, completedFN, completedfilepath,
             companyID,
             fileuserID, type) {
@@ -2111,10 +2253,11 @@
                             sendNotification(companyID, fileRepFolderId, ezTypeUserID,
                                 "",
                                 "", ezTypeUserID, filename + " " + display +
-                                " Error while uploading the file - " + completedFN + " " + type + " .",
+                                " Error while uploading the file - " + completedFN + " " + type +
+                                " .",
                                 false, statusfileuserID
                             );
-                            setTimeout(gotonextfile, 3000)
+                            //  setTimeout(gotonextfile, 3000)
                             return reject(err)
                         } else {
                             var container = $('#menu1');
@@ -2194,7 +2337,8 @@
 
 
         async function getServerPathSync(contents, fileRepFolderId) {
-            var tmpGSP = SITE_URL + "/api/jsonws/RSync-Portlet-portlet.rsync/get-folder-files/folder-ids/" + contents +
+            var tmpGSP = SITE_URL + "/api/jsonws/RSync-Portlet-portlet.rsync/get-folder-files/folder-ids/" +
+                contents +
                 "/grp-id/" + fileRepFolderId;
             console.log(JSON.stringify(tmpGSP))
             var optionsGSP = {
@@ -2295,38 +2439,52 @@
                     "\"" +
                     " .", {
                         cwd: destination
-                    },
-                    function (error, stdout, stderr) {
-                        console.log('stdout: ' + stdout);
-                        console.log('stderr: ' + stderr);
-                        if (error !== null) {
-                            console.log('exec error: ' + error);
-                        }
                     });
                 child.stdout.on('data', function (data) {
                     //pendingfiles();
-                    console.log(data)
-                    dataf.push(data);
+                    //console.log(data)
+                    // dataf.push(data);
                 })
 
-                child.stderr.on('data', function (data) {
+                child.stderr.on('data', async function (data) {
                     //pendingfiles();
                     console.log(data)
 
+                    if (data.match("spawn")) {
+                        okay = false
+                        return reject();
+                    } else if (data.match("No such file") || (data.match("some files"))) {
+                        okay = false
+                        return reject();
+                    } else {
 
-                    if (retry < 2) {
-                        if (data.match("spawn")) {
-                            var okay = false;
-                            rsyncFetch(serverPath,
-                                supportPath, "", "")
-                            retry++
+                    }
+
+                    /* if (retry < 3) {
+                        retry++
+                        if (data.match("spawn") || data.match("some files could not be transferred") ||
+                            data.match("No such file")) {
+                            okay = false;
+                            var container = $('#menu1');
+                            $(container).append("<div class='content_list_right'>" +
+                                "<span>" + "Rsync copy retry ." + "</span>" +
+                                "</div>");
+                            try {
+                                await rsyncFetch(filepath, destination, "", "")
+                            } catch (error) {
+                                console.log("Rsync failed inside .. Moving to next file")
+                            }
+
                         }
                     } else {
                         var container = $('#menu1');
                         $(container).append("<div class='content_list_right'>" +
                             "<span>" + "Rsync copy failed ." + "</span>" +
                             "</div>");
-                    }
+                        okay = false;
+
+                        return reject();
+                    } */
 
 
                 })
@@ -2335,14 +2493,15 @@
                     // Do async job
 
                     var container = $('#menu1');
-                    $(container).append("<div class='content_list_right'>" +
-                        "<span>" + "Rsync process completed ." + "</span>" +
-                        "</div>");
+
 
                     console.log(scriptsPath)
 
 
                     if (okay) {
+                        $(container).append("<div class='content_list_right'>" +
+                            "<span>" + "Rsync process completed ." + "</span>" +
+                            "</div>");
                         fse.ensureDirSync(destination + 'Fonts');
                         fse.ensureDirSync(destination + 'Art');
 
@@ -2350,7 +2509,7 @@
                             fse.move(destination + "Fonts/", destination + "Document fonts", {
                                 overwrite: true
                             }, err => {
-                                if (err) return console.error(err)
+                                if (err) return console.log(err)
 
                                 console.log('success!')
                             })
@@ -2363,7 +2522,7 @@
                             fse.move(destination + "Art/", destination + "Links", {
                                 overwrite: true
                             }, err => {
-                                if (err) return console.error(err)
+                                if (err) return console.log(err)
 
                                 console.log('success!')
                             })
@@ -2390,18 +2549,19 @@
 
                         // copydir.sync(destination + "PageMajik", "/Documents/Adobe\ Scripts/");
 
-                        fse.copy(destination + "PageMajik", os.homedir() + "/Documents/Adobe Scripts/" +
-                            fileEntryID,
+                        fse.copy(destination + "PageMajik", os.homedir() +
+                            "/Documents/Adobe Scripts/" +
+                            fileFolderId,
                             function (err) {
                                 if (err) {
-                                    console.error(err);
+                                    console.log(err);
                                 } else {
                                     console.log("success!");
                                     fse.copy(destination + "Adobe Scripts", os.homedir() +
-                                        "/Documents/Adobe Scripts/" + fileEntryID,
+                                        "/Documents/Adobe Scripts/" + fileFolderId,
                                         function (err) {
                                             if (err) {
-                                                console.error(err);
+                                                console.log(err);
                                             } else {
                                                 console.log("success!");
                                                 return resolve("done");
@@ -2414,6 +2574,7 @@
                         localStorage.setItem("heimdall", "true")
 
                     }
+
                 })
 
             })
@@ -2616,6 +2777,49 @@
 
         }
 
+        function removefolderpath(filepath) {
+            console.log(filepath)
+            var tmpRFP = SITE_URL +
+                "/api/jsonws/RSync-Portlet-portlet.rsync/remove-folder/"
+            console.log(JSON.stringify(tmpRFP))
+            var optionsRFP = {
+                method: 'POST',
+                uri: tmpRFP,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 120000,
+                formData: {
+                    path: filepath
+                }
+            };
+            //  console.log(fileEntryID)
+
+            // Return new promise 
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsRFP)
+                    .then(function (response) {
+                        // POST succeeded...
+                        //   console.log(response)
+                        console.log(JSON.parse(response))
+                        var currentRFP = JSON.parse(response)
+                        return resolve(currentRFP);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        gotonextfile();
+                        //   break;
+                        // cancel_checkout_download(fileEntryID, fileRepFolderId)
+                        return reject(err);
+                    });
+            })
+        }
+
         function putBookmapPageNumber(fileEntryId, title, PGnum) {
             var patt1 = /\.[0-9a-z]+$/i;
             var twe = title.replace(patt1, "")
@@ -2698,7 +2902,7 @@
                             "", ezTypeUserID, filename + " " + display +
                             "Cancel checkout failed. But the file is completed. Kindly cancel checkout manually if it is not Locked",
                             false, statusfileuserID);
-                        gotonextfile(); //Need to work on error - process completed but no checkout??
+                        // gotonextfile(); //Need to work on error - process completed but no checkout??
                         return reject(err);
                     });
             })

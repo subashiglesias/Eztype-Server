@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "gam-project-yqg-a89-ori",
+  "private_key_id": "b684137e31cebb9b4bb0ef3e97f6eb099df6d57f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQD1qBQ7yX7B0sLf\nopO81EGKq2025oujZMWcCfQnO5bGp/YNxcDQI5noFBjT4f/I7ZdIQTMYficy2S0x\nEn5B3DlDoj3WTyi95fgo0tsBlDk9KRv8oAbGOkVmBnykwYm45PZV+oXBxFDoyLsg\nWIQ1h2zoOMTggUN02bzxvfY/LEWmAdg+oP3/VKqXY0exDcyuNsSCUozn6Cf6CJnC\nfOQ5n+7YQyeDhuPrDKILGW3uy19KK9MZONtmQNVZcasphA7QE06TFje8y9pNJ0vd\nuCzWSbMiCC+QMG1/3DxODSjAEb1moNaCB/RHHUZE7EceV3Z70orYaPqnnY2p5J7X\nGHipMVSFAgMBAAECggEAPH7sHq4YHmzEC1VK6ytdSaQ+RNEhLbeNF4h2/StmTd1C\nkbEzsr41smqyk4laF5X1Fbjit6MnjZTglW9fsuHkI0UC0/JSDvPheVI11010jByB\n1SRmjq3+daney6cSvrr59AH6KxXos+7s8EIEKveDCSwjxcLnhRDzABhfGj8Rltft\na2sdPItosOpzv27cLeQfQXEe9JB0Oq37isDOSbJND4NYfJFddblnfRfkdkztQeOU\np+39yh4CYMdehFMD7+sosiapFHTweyDZrJPa5wAuGBq1IFCpo0Z2tKrJWxl1hpNO\n6/r16qomFBJU8dd8yMj+PN4NLi5nCZ/TrW35oRnIMQKBgQD/VcciedD967fsFUpd\nMenctf6nDxcjT6Zen/veOxRsPg5z+9TNdzKm1V5fdBX9s2W7rlO5oQZRQoQffa1J\nzBGqTKSY1sT+UtdHRYGlyja7nXDcg68Zd6aLCo36Ze1luIgKPwrLUawrhDfdf+CY\nO+jN+LOLkOicee4xCxq/jiCIlQKBgQD2S9lP0JxGz9ccRgQWRyVtPF3aVAaPPs7+\nLXJ7N9M0wT5dfP/Gb33aCN76ogo83hRt0UQHzoDJ2In3rh1X29SdoMis5BFKHTo3\nAUg3x4NySPEBFPR8nKTuvxjjEK8qEIPVmo+GGSBOy9lj9yZKmi/a7THZsXRmfXJJ\nPzCoqN5wMQKBgQCRyT0w3xLH2E2kOyfBfF1FypgCdKhGXhTk1D2vzlXD087WxEPl\nqJhAD3WZ1KM1vrdoaImfZGRCA1OC03QcvaqcbLRSG9ZQS6ZlKDd1HLcRejxVe85/\nIQTzQGx+OrJIMQtjpkkYe6JtGkn3aysmYJZ0+/ovxuY5aZjpYai9FH5Y3QKBgGFX\nzQW8n2dlUdF84rSjXel0iGt39je7TTgsYijNAY7CKZHti3G0MvtvsiFA1ecEpvJY\nWRj0xvX/vVfE2xgUbE34dBfQ8/xk3NNMkGxrUEplBcu1qoNtrcomgQGNYI2xhUlx\nEvSfDaPW8Y6O6fVmRy+xu5gciLLRNdA5R1QBmhihAoGAfVNKhMpDGZPyCRNVP2RE\nI0tdyVgwM6YFXpNxbJnru8JJiJir9YNHIPMj+eAgHZCuywTdYWC+8IyoPgRzY9g6\nVxuNn5gwkVC1MAWOY2GJMZDI2vTeQLlkgzwrsp+ILjItlWc5GGE2hUDA9/G8GEbd\n+VgMfEJYR85GrNqcYChilWI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "eztypemailer@gam-project-yqg-a89-ori.iam.gserviceaccount.com",
+  "client_id": "104037130696730818267",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/eztypemailer%40gam-project-yqg-a89-ori.iam.gserviceaccount.com"
+}

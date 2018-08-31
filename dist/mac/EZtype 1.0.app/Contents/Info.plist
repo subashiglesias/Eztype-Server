@@ -45,6 +45,6 @@
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2018 PageMajik</string>
     <key>AsarIntegrity</key>
-    <string>{"checksums":{"app.asar":"XbfSeBKp1vnGoxdqbsRpxdM/qLvtV7j+Pd6WPWqF2xPy6xMlpz10g5Bn6nV23Wp0DmFyoaz5bhHP9pzm3tpHOQ==","electron.asar":"N8qMkArPe2Vz78otrpXE3aNxOfCVyD1sqLzLTkMM5HY6Di2N/zv+HQhnv0+XjE/PttdJYymWUm+D0oj39WbLiA=="}}</string>
+    <string>{"checksums":{"app.asar":"gYzHnLP2r2M54UFzrYp58FegH2AzSjNE6NWS83+gNyS7uoZU+9UpG2IQQzEBpJoKWnpHc23Qulu0MdjPRka0KQ==","electron.asar":"N8qMkArPe2Vz78otrpXE3aNxOfCVyD1sqLzLTkMM5HY6Di2N/zv+HQhnv0+XjE/PttdJYymWUm+D0oj39WbLiA=="}}</string>
   </dict>
 </plist>
