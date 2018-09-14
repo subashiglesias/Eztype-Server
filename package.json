@@ -45,7 +45,8 @@
       "JS/*",
       "node_modules/**/*",
       "package.json",
-      "windows.js"
+      "windows.js",
+      "dummy.js"
     ]
   },
   "devDependencies": {
