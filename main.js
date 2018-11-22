@@ -83,7 +83,7 @@ app.on('ready', function () {
             
         } else if (os.match("OS X") || os.match("macOS")) {
 
-            mainWindow.loadURL('file://' + __dirname + '/mainpage_mac_sev.html');  
+            mainWindow.loadURL('file://' + __dirname + '/mainpage.html');  
             return "Mac"
         } else if (os.match("Windows")) {
             
