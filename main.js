@@ -25,24 +25,30 @@ var mainWindow = null;
 var URL = require('url-parse');
 var cmd = require('node-cmd');
 var gulp = require('gulp')
-var gulpSequence = require('gulp-sequence')
+var gulpSequence = require('gulp-sequence');
 
 
 
+// var express = require("express");
+// var bodyParser = require("body-parser");
+// var routes = require("./routes/routes.js");
+// var exp = express();
 
+// exp.use(bodyParser.json());
+// exp.use(bodyParser.urlencoded({ extended: true }));
 
+// routes(exp);
+
+// var server = exp.listen(3000, function () {
+//     console.log("app running on port.", server.address().port);
+// });
 
 
 
 app.on('ready', function () {
 
     var SYSTEM_OS;
-    var webDavURL;
-    /* console.log(SYSTEM_OS);*/
-    var dat;
-    var mountFirst = true;
-    var batdat;
-    var drivemounted = false;
+
     //Need to write a function to read it from file after frontend is developed
   
 
