@@ -20,7 +20,7 @@ module.exports = {
 
 
                 if (tmppath.match("_Completed.txt")) {
-                    completed(tmppath, addorupdatefilewithretry, sendNotification1);
+                    completed(tmppath, addorupdatefilewithretry, sendNotification1,cancel_checkout);
                 }
 
 
@@ -278,12 +278,57 @@ module.exports = {
                     });
             })
         }
+
+        function cancel_checkout(tmpfileEntryID,SITE_URL) {
+            var tmpCC =  SITE_URL + "/api/jsonws/dlapp/cancel-check-out/file-entry-id/" + tmpfileEntryID;
+            console.log(JSON.stringify(tmpCC))
+            var optionsCC = {
+                method: 'POST',
+                uri: tmpCC,
+                auth: {
+                    'user': DEFAULT_USER,
+                    'pass': DEFAULT_PASS
+                },
+                timeout: 240000,
+                resolveWithFullResponse: true
+            };
+            //  console.log(fileEntryID)
+
+            // Return new promise
+
+            return new Promise(function (resolve, reject) {
+                // Do async job
+                rp(optionsCC)
+                    .then(function (response) {
+                        // POST succeeded...
+                           console.log(JSON.parse(response.body))
+                        if (response.body.match("exception")) {
+                           // gotonextfile();
+                            return reject("exception")
+                        }
+                        var currentCC = JSON.parse(response.body)
+                        return resolve(currentCC);
+
+                    })
+                    .catch(function (err) {
+                        // POST failed...
+                        console.log(err)
+                        sendNotification(companyID, fileRepFolderId, ezTypeUserID,
+                            "",
+                            "", ezTypeUserID, filename + " " + display +
+                            "Cancel checkout failed. But the file is completed. Kindly cancel checkout manually if it is not Locked",
+                            false, statusfileuserID);
+                        // gotonextfile(); //Need to work on error - process completed but no checkout??
+                        return reject(err);
+                    });
+            })
+        }
     }
 
 
 };
 
-function completed(tmppath, addorupdatefilewithretry, sendNotification1) {
+function completed(tmppath, addorupdatefilewithretry, sendNotification1,cancel_checkout) {
     console.log(tmppath);
     // var inddpath = tmppath.replace("_Completed.txt", ".indd");
     // var idmlpath = tmppath.replace("_Completed.txt", ".idml");
@@ -317,7 +362,7 @@ function completed(tmppath, addorupdatefilewithretry, sendNotification1) {
     fs.readFile(tmppath, 'utf8', async function (err, data) {
         if (err)
             throw err;
-        console.log('OK: ' + filename);
+        console.log('OK: ' + tmppath);
         console.log(JSON.parse(data));
         data = JSON.parse(data);
         plainfilename = data.fileName;
@@ -355,7 +400,7 @@ function completed(tmppath, addorupdatefilewithretry, sendNotification1) {
                 " " +
                 display +
                 " Complete", false, statusfileuserID);
-            await cancel_checkout(tmpfileEntryID);
+            await cancel_checkout(tmpfileEntryID,SITE_URL);
             var delpath = pdfpath.replace(pdffilename, "");
             var delpath1 = os.homedir() + "/" + "Documents/Adobe Scripts/" +
                 fileFolderId;
@@ -385,9 +430,9 @@ function completed(tmppath, addorupdatefilewithretry, sendNotification1) {
                 sendmail("Upload for idml failed ", "Upload Failed for file " + idmlfilename + " in the site " + SITE_URL);
             }
             try {
-                await cancel_checkout(tmpfileEntryID);
+                await cancel_checkout(tmpfileEntryID,SITE_URL);
             } catch (error) {
-                console.log("Cancel checkout failed");
+                console.log("Cancel checkout failed : " + error);
             }
             var delpath = pdfpath.replace(pdffilename, "");
             var delpath1 = os.homedir() + "/" + "Documents/Adobe Scripts/" +

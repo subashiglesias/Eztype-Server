@@ -279,6 +279,8 @@
         var output = localStorage.getItem('output');
         var fs = nodeRequire("fs");
         const fileExists = nodeRequire('file-exists');
+        var winston = nodeRequire('winston');
+        var config = nodeRequire('./config.json')
 
 
 
@@ -315,18 +317,36 @@
         }
 
         function CheckStack() {
+            var timeout;
+            if(config.hasOwnProperty('Easytpe_Queue_Refresh_Interval')){
+                timeout = config['Easytpe_Queue_Refresh_Interval'] * 1000
+            } else {
+                timeout = 10000
+            }
+            //console.log(timeout)
             if (!Array.isArray(stack) || !stack.length) {
                 // array does not exist, is not an array, or is empty
 
-                console.log("Yo!!! ain't got no juice")
+                console.log("Array empty")
             } else {
                 console.log("Now we're talkin'")
                 //Check the number of main instances 
                 //await getSiteCreds(SITE_URL)
                 //Make sure same fileEntry doesn'r exist
-                main(stack.shift())
+
+
+                console.log(main(stack.shift()));
+
+                // main(36493512);
+                // main(36493590);
+                // main(38519096);
+                // main(36400200);
+                // main(36338372);
+                // main(36864358);
+                // main(36864655);
+                // main(36864728);
             }
-            setTimeout(CheckStack, 10000)
+            setTimeout(CheckStack, timeout)
         }
 
         function getSiteCreds() {
@@ -334,8 +354,10 @@
         }
 
         async function main(fileEntryId) {
-            var fileEntryId = fileEntryId;
-            fileEntryId = 36493512;
+            var temp = fileEntryId.split("***")
+            var fileEntryId = temp[0];
+            var logger;
+            //fileEntryId = 36493512;
             var process;
             var filePath;
             var filepathbroken;
@@ -381,15 +403,31 @@
             var JsxContents;
             var ezTypeUserId;
             var supportPath;
-            var SITE_URL = "http://developer.pagemajik.online"
-            var DEFAULT_USER = "process"
-            var DEFAULT_PASS = "1234"
-            
+            var SITE_URL = temp[1]
+
+
+            if(config.hasOwnProperty(SITE_URL)){
+                console.log("Yoo.. U got the rep")
+                console.log(config)
+                DEFAULT_USER = config[SITE_URL][0]
+                DEFAULT_PASS = config[SITE_URL][1]
+            } else {
+                console.log("Not supposed to work here")
+                return
+            }
+
+
+            // var DEFAULT_USER = "process"
+            // var DEFAULT_PASS = "1234"
+
+
+
+
 
 
             console.log("Gotcha!!! popping from stack")
             console.log(stack)
-            
+
             await fetchDetailsFromFileEntryId(fileEntryId).then(async function (result) {
                 //http://developer.pagemajik.online/api/jsonws/Dazzle-portlet.pagemajik/get-all-file-assets/file-entry-id/39954210
 
@@ -420,15 +458,48 @@
                 stage = result.field5;
                 filename = result.fileName;
                 filePresetId = result.presetFileId;
-
-                getUserIdByScreenName(companyId, DEFAULT_USER).then(function (
-                    result) {
-                    ezTypeUserId = result;
-                });
-
                 supportPath = PAGEMAJIK_DOWNLOAD_PATH + fileRepFolderId +
                     "/" +
                     fileFolderId + "/";
+
+                await getUserIdByScreenName(companyId, DEFAULT_USER).then(function (
+                    result) {
+                    ezTypeUserId = result;
+                   // console.log("Yooooooooooooo" +ezTypeUserId)
+                });
+                
+               
+
+                logger = winston.createLogger({
+                    level: 'info',
+                    format: winston.format.json(),
+                    transports: [
+                        //
+                        // - Write to all logs with level `info` and below to `combined.log` 
+                        // - Write all logs error (and below) to `error.log`.
+                        //
+                        new winston.transports.Stream({
+                            stream: fs.createWriteStream(PAGEMAJIK_DOWNLOAD_PATH + "/" +
+                                fileEntryId + '_error.log', {
+                                    flags: 'a'
+                                }),
+                            level: 'error'
+                        }),
+                        new winston.transports.Stream({
+                            stream: fs.createWriteStream(PAGEMAJIK_DOWNLOAD_PATH + "/" +
+                                fileEntryId + '.log', {
+                                    flags: 'a'
+                                }),
+                            level: 'info'
+                        })
+                    ]
+                });
+
+                logger.info("I am " + fileEntryId)
+
+
+
+
 
 
                 indesignScriptInpPath = PAGEMAJIK_DOWNLOAD_PATH +
@@ -454,13 +525,13 @@
                     } else {
                         pagenum = JSON.stringify(result)
                     }
-                    
+
                     try {
                         JsxContents = writeJStoIndesignScriptJSX();
                     } catch (error) {
                         console.log(error)
                     }
-                   
+
 
                     yin = true
 
@@ -566,7 +637,7 @@
                     removefolderpath(removepath);
 
                 } catch (error) {
-                    console.log("Unable to remove folder path")
+                    logger.error("Unable to remove folder path")
                 }
 
                 var scriptName = "AutoPagination_Processor_Caller.jsx"
@@ -582,22 +653,22 @@
                 fs.writeFileSync(scriptsPath +
                     scriptName, text, {},
                     function (err, data) {
-                        console.log(err)
+                        logger.error(err)
                     });
 
                 fontsFolderPath = supportPath + "Document fonts/"
 
                 await fs.readdirSync(fontsFolderPath).forEach(file => {
-                    console.log(file);
+                    logger.info(file);
                     if (file.match(".zip")) {
 
                         osascript.execute(
                             'tell application "Finder" to open POSIX file \"' +
                             fontsFolderPath + "/" + file + '\"',
                             function (err, result, raw) {
-                                if (err) return console.log(
+                                if (err) return logger.info(
                                     err)
-                                console.log(result, raw)
+                                logger.info(result, raw)
                             });
 
                     }
@@ -662,7 +733,7 @@
                 try {
                     removefolderpath(removepath);
                 } catch (error) {
-                    console.log("Unable to remove folder path " + error)
+                    logger.error("Unable to remove folder path " + error)
                 }
 
                 var data = fs.readFileSync(scriptsPath +
@@ -675,22 +746,22 @@
                 fs.writeFileSync(scriptsPath +
                     scriptName, text, {},
                     function (err, data) {
-                        console.log(err)
+                        logger.error(err)
                     });
 
                 fontsFolderPath = supportPath + "Document fonts/"
 
                 fs.readdirSync(fontsFolderPath).forEach(file => {
-                    console.log(file);
+                    logger.info(file);
                     if (file.match(".zip")) {
 
                         osascript.execute(
                             'tell application "Finder" to open POSIX file \"' +
                             fontsFolderPath + "/" + file + '\"',
                             function (err, result, raw) {
-                                if (err) return console.log(
+                                if (err) return logger.info(
                                     err)
-                                console.log(result, raw)
+                                logger.info(result, raw)
                             });
 
                     }
@@ -735,14 +806,14 @@
                     "http://localhost:8080/com.adobe.clover.application/api/idsqueue/EnqueueJob?scriptName=" +
                     tmpscript + processtype + "&jobName=" + fileEntryId +
                     "&priority=.5&queueName=Default&maximumRetryCount=3"
-                console.log(JSON.stringify(tmpIND))
+                logger.info(JSON.stringify(tmpIND))
                 var optionsIND = {
                     method: 'GET',
                     uri: tmpIND,
                     timeout: 360000,
                     resolveWithFullResponse: true
                 };
-                // console.log(fileEntryID)
+                // logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -751,16 +822,16 @@
                     rp(optionsIND)
                         .then(function (response) {
                             // POST succeeded...
-                            console.log(response.body)
+                            logger.info(response.body)
                             var currentIND = response
-                            // console.log(currentGPF.title)
+                            // logger.info(currentGPF.title)
 
                             return resolve(currentIND);
 
                         })
                         .catch(function (err) {
                             // POST failed...
-                            console.log(err);
+                            logger.error(err);
                             //  gotonextfile();
                             return reject(err);
 
@@ -804,7 +875,7 @@
                         .catch(function (err) {
                             // POST failed...
                             console.log(err)
-                            gotonextfile();
+                          //  gotonextfile();
                             //  break;
                             // cancel_checkout_download(fileEntryID, fileRepFolderId)
                             return reject(err);
@@ -828,7 +899,7 @@
                     timeout: 600000,
                     resolveWithFullResponse: true
                 };
-                //  console.log(fileEntryID)
+                //  logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -845,7 +916,7 @@
                         .catch(function (err) {
                             // POST failed...
                             console.log(err)
-                            gotonextfile();
+                            // gotonextfile();
                             // cancel_checkout_download(fileEntryID, fileRepFolderId)
                             return reject(err);
                         });
@@ -860,7 +931,7 @@
 
             function getPresetFilename(id) {
                 var tmpGPF = SITE_URL + "/api/jsonws/dlapp/get-file-entry/file-entry-id/" + id;
-                console.log(JSON.stringify(tmpGPF))
+                logger.info(JSON.stringify(tmpGPF))
                 var optionsGPF = {
                     method: 'GET',
                     uri: tmpGPF,
@@ -871,7 +942,7 @@
                     timeout: 240000,
                     resolveWithFullResponse: true
                 };
-                // console.log(fileEntryID)
+                // logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -880,16 +951,16 @@
                     rp(optionsGPF)
                         .then(function (response) {
                             // POST succeeded...
-                            //    console.log(JSON.parse(response.body))
+                            //    logger.info(JSON.parse(response.body))
                             var currentGPF = JSON.parse(response.body)
-                            // console.log(currentGPF.title)
+                            // logger.info(currentGPF.title)
 
                             return resolve(currentGPF.title);
 
                         })
                         .catch(function (err) {
                             // POST failed...
-                            console.log(err);
+                            logger.info(err);
                             //  gotonextfile();
                             return reject(err);
 
@@ -913,7 +984,7 @@
                     timeout: 120000,
                     resolveWithFullResponse: true
                 };
-                //  console.log(fileEntryID)
+                //  logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -957,7 +1028,7 @@
                         contents = contents + "%2C" + PresetId;
                         presetFileName = await getPresetFilename(
                             filePresetId);
-                        console.log(presetFileName)
+                        logger.info(presetFileName)
                     }
                     if (SiteLevelAdobeScriptId != 0) {
                         // contents.push(SiteLevelAdobeScriptID);
@@ -1021,10 +1092,10 @@
             }
 
             function removefolderpath(filepath) {
-                console.log(filepath)
+                logger.info(filepath)
                 var tmpRFP = SITE_URL +
                     "/api/jsonws/RSync-Portlet-portlet.rsync/remove-folder/"
-                console.log(JSON.stringify(tmpRFP))
+                logger.info(JSON.stringify(tmpRFP))
                 var optionsRFP = {
                     method: 'POST',
                     uri: tmpRFP,
@@ -1037,7 +1108,7 @@
                         path: filepath
                     }
                 };
-                //  console.log(fileEntryID)
+                //  logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -1046,15 +1117,15 @@
                     rp(optionsRFP)
                         .then(function (response) {
                             // POST succeeded...
-                            //   console.log(response)
-                            console.log(JSON.parse(response))
+                            //   logger.info(response)
+                            logger.info(JSON.parse(response))
                             var currentRFP = JSON.parse(response)
                             return resolve(currentRFP);
 
                         })
                         .catch(function (err) {
                             // POST failed...
-                            console.log(err)
+                            logger.info(err)
                             gotonextfile();
                             //   break;
                             // cancel_checkout_download(fileEntryID, fileRepFolderId)
@@ -1067,7 +1138,7 @@
                 var tmpCCD = SITE_URL + "/api/jsonws/Dazzle-portlet.pagemajik/universal-service/file-entry-id/" +
                     fileEntryID + "/group-id/" + fileRepFolderId +
                     "/status/In%20Progress/option/1";
-                console.log(JSON.stringify(tmpCCD))
+                logger.info(JSON.stringify(tmpCCD))
                 var optionsCCD = {
                     method: 'POST',
                     uri: tmpCCD,
@@ -1078,7 +1149,7 @@
                     timeout: 240000,
                     resolveWithFullResponse: true
                 };
-                //  console.log(fileEntryID)
+                //  logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -1087,14 +1158,14 @@
                     rp(optionsCCD)
                         .then(function (response) {
                             // POST succeeded...
-                            //   console.log(JSON.parse(response.body))
+                            //   logger.info(JSON.parse(response.body))
                             var currentCCD = JSON.parse(response.body)
                             return resolve(currentCCD);
 
                         })
                         .catch(function (err) {
                             // POST failed...
-                            console.log(err)
+                            logger.info(err)
                             // cancel_checkout_download(fileEntryID, fileRepFolderId)
                             sendNotification(companyID, fileRepFolderId, ezTypeUserID,
                                 "",
@@ -1111,7 +1182,7 @@
                 var tmpGSP = SITE_URL + "/api/jsonws/RSync-Portlet-portlet.rsync/get-folder-files/folder-ids/" +
                     contents +
                     "/grp-id/" + fileRepFolderId;
-                console.log(JSON.stringify(tmpGSP))
+                logger.info(JSON.stringify(tmpGSP))
                 var optionsGSP = {
                     method: 'GET',
                     uri: tmpGSP,
@@ -1122,7 +1193,7 @@
                     timeout: 600000,
                     resolveWithFullResponse: true
                 };
-                //  console.log(fileEntryID)
+                //  logger.info(fileEntryID)
 
                 // Return new promise 
 
@@ -1131,14 +1202,14 @@
                     rp(optionsGSP)
                         .then(function (response) {
                             // POST succeeded...
-                            console.log(JSON.parse(response.body))
+                            logger.info(JSON.parse(response.body))
                             var currentGSP = JSON.parse(response.body)
                             return resolve(currentGSP);
 
                         })
                         .catch(function (err) {
                             // POST failed...
-                            console.log(err)
+                            logger.info(err)
                             gotonextfile();
                             // cancel_checkout_download(fileEntryID, fileRepFolderId)
                             return reject(err);
@@ -1257,7 +1328,7 @@
                     }
                     //    key = key.replace(patt, '\\$1');
 
-                    console.log(os.homedir() + destination)
+                    logger.info(os.homedir() + destination)
                     var dataf = [];
 
                     //sample command
@@ -1280,7 +1351,7 @@
 
                     child.stderr.on('data', async function (data) {
                         //pendingfiles();
-                        console.log(data)
+                        logger.info(data)
 
                         if (data.match("spawn")) {
                             okay = false
@@ -1301,7 +1372,7 @@
                         var container = $('#menu1');
 
 
-                        console.log(scriptsPath)
+                        logger.info(scriptsPath)
 
 
                         if (okay) {
@@ -1315,9 +1386,9 @@
                                 fse.move(destination + "Fonts/", destination + "Document fonts", {
                                     overwrite: true
                                 }, err => {
-                                    if (err) return console.log(err)
+                                    if (err) return logger.info(err)
 
-                                    console.log('success!')
+                                    logger.info('success!')
                                 })
                             } catch (error) {
                                 return reject(err);
@@ -1328,9 +1399,9 @@
                                 fse.move(destination + "Art/", destination + "Links", {
                                     overwrite: true
                                 }, err => {
-                                    if (err) return console.log(err)
+                                    if (err) return logger.info(err)
 
-                                    console.log('success!')
+                                    logger.info('success!')
                                 })
                             } catch (error) {
                                 return reject(err);
@@ -1339,7 +1410,7 @@
 
                             fse.ensureDirSync(destination + "Print Preset");
                             fs.readdirSync(destination + "Print Preset").forEach(file => {
-                                console.log(file);
+                                logger.info(file);
                                 if (file !== presetFileName) {
                                     fs.unlink(destination + "Print Preset/" + file)
                                 }
@@ -1349,9 +1420,9 @@
                             //   copydir.sync(destination + "PageMajik", "/Documents/Adobe\ Scripts/");
 
                             var i = 1
-                            //  console.log("Copying scripts one")
+                            //  logger.info("Copying scripts one")
                             //    await  copydir(destination + "PageMajik/*", os.homedir()+"/Documents/Adobe\ Scripts/")
-                            //   console.log("copying scripts two")
+                            //   logger.info("copying scripts two")
                             //      await  copydir(destination + "Adobe\ Scripts/*", os.homedir()+"/Documents/Adobe\ Scripts/")
 
                             // copydir.sync(destination + "PageMajik", "/Documents/Adobe\ Scripts/");
@@ -1360,10 +1431,10 @@
                                 destination,
                                 function (err) {
                                     if (err) {
-                                        console.log(err);
+                                        logger.warn(err);
                                         return reject(err);
                                     } else {
-                                        console.log("success!");
+                                        logger.info("success!");
                                     }
                                 });
 
@@ -1372,18 +1443,18 @@
                                 fileFolderId,
                                 function (err) {
                                     if (err) {
-                                        console.log(err);
+                                        logger.error(err);
                                         return reject(err);
                                     } else {
-                                        console.log("success!");
+                                        logger.info("success!");
                                         fse.copy(destination + "Adobe Scripts", os.homedir() +
                                             "/Documents/Adobe Scripts/" + fileFolderId,
                                             function (err) {
                                                 if (err) {
-                                                    console.log(err);
+                                                    logger.error(err);
                                                     return reject(err);
                                                 } else {
-                                                    console.log("success!");
+                                                    logger.info("success!");
                                                     return resolve("done");
                                                 }
                                             });
@@ -1399,7 +1470,7 @@
             }
 
             function writeJStoIndesignScriptJSX() {
-                console.log("JSX script")
+                logger.info("JSX script")
                 var javascriptContent = '';
                 javascriptContent = javascriptContent +
                     " var	statusfileuserID = \"" +
@@ -1479,7 +1550,7 @@
                 javascriptContent = javascriptContent +
                     " var SupportID = \"" +
                     SupportId + "\"" + "\n";
-                console.log(javascriptContent);
+                logger.info(javascriptContent);
 
                 return javascriptContent
 
@@ -1525,7 +1596,8 @@
 
 
         var updateStack = function (stackvalue) {
-            stack.push(stackvalue)
+           // stack.push(stackvalue)
+            stack.indexOf(stackvalue) === -1 ? stack.push(stackvalue) : console.log("This item already exists");
             console.log(stack)
         }
 

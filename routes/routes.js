@@ -11,15 +11,18 @@ var appRouter = function (app) {
     app.get("/id/:id/site/:site", function (req, res) {
         //Will get file entry id in this method
         var fileEntryId = parseInt(req.params.id);
-        var SITE = "http://www." + req.params.site
+        var SITE = "http://" + req.params.site
         res.status(200).send("Good Job");
         console.log(typeof fileEntryId)
         console.log(SITE)
+        updateStack(fileEntryId +"***"+SITE)
+       // updateStack(fileEntryId)
+
        // var regex = new RegExp("");
        console.log(validateUrl(req.params.site))
         if(typeof fileEntryId == "number" && validateUrl(req.params.site)) {
           console.log("AM in")
-          updateStack(fileEntryId)
+          updateStack(fileEntryId +"***"+SITE)
 
         }
         

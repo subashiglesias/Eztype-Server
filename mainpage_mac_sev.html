@@ -2098,7 +2098,7 @@
 
             var tmpscript = scriptsPath.replace(" ", "%20")
             var tmpIND = "http://localhost:8080/com.adobe.clover.application/api/idsqueue/EnqueueJob?scriptName=" +
-                tmpscript + processtype + "&jobName="+  filePath +"&priority=.5&queueName=Default&maximumRetryCount=3"
+                tmpscript + processtype + "&jobName="+  fileEntryId +"&priority=.5&queueName=Default&maximumRetryCount=3"
             console.log(JSON.stringify(tmpIND))
             var optionsIND = {
                 method: 'GET',
