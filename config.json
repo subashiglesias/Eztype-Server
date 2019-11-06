@@ -4,6 +4,6 @@
 {
     "dev.me.com": ["username", "password"],
     "Easytpe_Queue_Refresh_Interval": 10, 
-    "http://developer.pagemajik.online": ["process", "1234"],
-    "http://lambda.pagemajik.online": ["process","1234"]
+    "http://developer.pagemajik.online": ["", ""],
+    "http://lambda.pagemajik.online": ["",""]
 }
